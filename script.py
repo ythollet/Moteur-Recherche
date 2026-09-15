@@ -1,3 +1,5 @@
+# %%
+
 import praw
 import urllib.request
 # import xmltodict
@@ -5,62 +7,86 @@ import urllib.request
 # import json
 # import pickle
 # import datetime
-# import pandas as pd
+import pandas as pd
 import arxiv
 import os
+from dotenv import load_dotenv
 
-# taille_docs=10
-
-# # Récupération de textes depuis Reddit
-# reddit = praw.Reddit(
-#     client_id=os.getenv('CLIENT_ID'), 
-#     client_secret=os.getenv('CLIENT'), 
-#     user_agent=os.getenv('Walid_M1')
-# )
+load_dotenv()
 
 
-# subr = reddit.subreddit('vosfinances')
+def func_get_data_reddit():
 
-# posts = list(subr.hot(limit=taille_docs))
+    taille_docs=10
 
-# textes_Reddit = []
-# for post in posts:
+    # Récupération de textes depuis Reddit
+    reddit = praw.Reddit(
+        client_id=os.getenv('CLIENT_ID'), 
+        client_secret=os.getenv('CLIENT_SECRET'),
+        user_agent=os.getenv('USER_AGENT')
+    )
 
-#     # Titre toujours présent
-#     texte = post.title.replace("\n", " ") + ". "
+    subr = reddit.subreddit('vosfinances')
 
-#     if post.selftext:
-#         texte += post.selftext.replace("\n", " ")
-#     elif post.url:
-#         texte += post.url
+    posts = list(subr.hot(limit=taille_docs))
 
-#     textes_Reddit.append(texte)
+    textes_Reddit = []
+    for post in posts:
 
-# print("\n\n Nombre de posts Reddit collectés :", len(textes_Reddit))
+        # Titre toujours présent
+        texte = post.title.replace("\n", " ") + ". "
 
-# for texte in textes_Reddit[:5]:
-#     print("\n\n\n---")
-#     print(texte)
+        if post.selftext:
+            texte += post.selftext.replace("\n", " ")
 
 
-# # Initialisation du client
-# client = arxiv.Client(
-#     page_size=10,
-#     delay_seconds=3.0,  # Respecte la politique de rate limit d'arXiv
-#     num_retries=3
-# )
+        textes_Reddit.append(texte)
 
-# # Recherche par mots-clés ou catégorie (ex: Computer Vision / cs.CV)
-# search = arxiv.Search(
-#     query="cat:cs.CV AND deep learning",
-#     max_results=5,
-#     sort_by=arxiv.SortCriterion.SubmittedDate
-# )
+    print("\n\n Nombre de posts Reddit collectés :", len(textes_Reddit))
 
-# for result in client.results(search):
-#     print(f"Titre : {result.title}")
-#     print(f"Auteurs : {', '.join(a.name for a in result.authors)}")
-#     print(f"Date : {result.published.date()}")
-#     print(f"PDF : {result.pdf_url}")
-#     print(f"Résumé : {result.summary[:150]}...")
-#     print("-" * 40)
+    # Cnversion du texte Reddit en DataFrame
+    df_reddit = pd.DataFrame(textes_Reddit, columns = ['texte'])
+
+    # On crée une colonne 'id'
+    df_reddit = df_reddit.reset_index(names='id')
+
+    # On spécifie l'origine des données (Reddit)
+    df_reddit['origine'] = 'Reddit'
+
+    return df_reddit
+
+
+def func_get_data_arxiv():
+
+    # Initialisation du client
+    client = arxiv.Client(
+        page_size=10,
+        delay_seconds=3.0,  # Respecte la politique de rate limit d'arXiv
+        num_retries=3
+    )
+
+    # Recherche par mots-clés ou catégorie (ex: Computer Vision / cs.CV)
+    search = arxiv.Search(
+        query="cat:cs.CV AND deep learning",
+        max_results=5,
+        sort_by=arxiv.SortCriterion.SubmittedDate
+    )
+    print("t")
+
+    for result in client.results(search):
+        print(f"Titre : {result.title}")
+        print(f"Auteurs : {', '.join(a.name for a in result.authors)}")
+        print(f"Date : {result.published.date()}")
+        print(f"PDF : {result.pdf_url}")
+        print(f"Résumé : {result.summary[:150]}...")
+        print("-" * 40)
+
+
+def main():
+
+    df_reddit = func_get_data_reddit()
+    print(df_reddit)
+
+
+main()
+# %%
