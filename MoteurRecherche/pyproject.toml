@@ -1,0 +1,9 @@
+[project]
+name = "moteurrecherche"
+version = "0.1.0"
+requires-python = ">=3.13"
+dependencies = [
+    "arxiv>=4.0.1",
+    "praw>=8.0.3",
+    "python-dotenv>=1.2.3",
+]
