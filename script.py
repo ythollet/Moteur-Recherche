@@ -2,8 +2,9 @@
 
 import praw
 import urllib.request
+import io
 import pdfplumber
-# import xmltodict
+import xmltodict
 # import numpy as np
 # import json
 # import pickle
@@ -43,7 +44,7 @@ def func_fetch_data_reddit():
 
         textes_Reddit.append(texte)
 
-    print("\n\n Nombre de posts Reddit collectés :", len(textes_Reddit))
+    # print("\n\n Nombre de posts Reddit collectés :", len(textes_Reddit))
 
     # Conversion du texte Reddit en DataFrame
     df_reddit = pd.DataFrame(textes_Reddit, columns = ['texte'])
@@ -61,38 +62,41 @@ def func_read_csv_reddit():
 
 def func_fetch_data_arxiv():
 
-    # Initialisation du client
-    client = arxiv.Client(
-        page_size=10,
-        delay_seconds=3.0,  # Respecte la politique de rate limit d'arXiv
-        num_retries=3
-    )
 
-    # Recherche par mots-clés ou catégorie (ex: Computer Vision / cs.CV)
-    search = arxiv.Search(
-        query="cat:cs.CV AND deep learning",
-        max_results=5,
-        sort_by=arxiv.SortCriterion.SubmittedDate
-    )
+    # Recherche par mots-clés ou catégorie (ex: Quantitative Finance / q-fin.PM)
+    url = "https://export.arxiv.org/api/query?search_query=all:investment&start=0&max_results=" + str(10)
 
-    textes = []
+    req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0', 'Accept': '*/*'})
 
-    for result in client.results(search):
+    texte_all_pdfs = []
 
-        # Téléchargement du PDF
-        pdf_path = result.download_pdf(dirpath="papers")
+    # Téléchargement du PDF en mémoire
+    with urllib.request.urlopen(req) as response:
+        xml_data = response.read().decode('utf-8')
 
-        with pdfplumber.open(pdf_path) as pdf:
+        dict_arxiv = xmltodict.parse(xml_data)
 
-            for page in pdf.pages:
+    entries = dict_arxiv['feed'].get('entry', [])
+    if isinstance(entries, dict):
+        entries = [entries]
 
-                textes.append(page.extract_text or '')
+    print("Nombre d'articles Arxiv trouvés :", len(entries))
 
-    df_arxiv = pd.DataFrame(textes, columns = ['text'])
+    textes_Arxiv = []
+    for entry in entries:
+        texte = entry['summary'].replace('\n', ' ').strip()
+        textes_Arxiv.append(texte)
+
+    for texte in textes_Arxiv[:5]:
+        print("\n\n\n---")
+        print(texte)
+
+    df_arxiv = pd.DataFrame(textes_Arxiv, columns = ['text'])
 
     df_arxiv['origine'] = 'Arxiv'
 
     df_arxiv.to_csv('data/df_arxiv.csv', index_label = 'id', sep='\t')
+
 
 def func_read_csv_arxiv():
 
@@ -101,12 +105,15 @@ def func_read_csv_arxiv():
 
 def main():
 
-    if os.path.isfile('data/df_data_reddit.csv'):
+    if not os.path.isfile('data/df_reddit.csv'):
         func_fetch_data_reddit()
     df_reddit = func_read_csv_reddit()
+    # print(df_reddit)
 
-    func_fetch_data_arxiv()
+    if not os.path.isfile('data/df_arxiv.csv'):
+        func_fetch_data_arxiv()
     df_arxiv = func_read_csv_arxiv()
+    # print(df_arxiv)
 
 
 main()

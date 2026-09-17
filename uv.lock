@@ -390,6 +390,8 @@ dependencies = [
     { name = "pdfplumber" },
     { name = "praw" },
     { name = "python-dotenv" },
+    { name = "xmldict" },
+    { name = "xmltodict" },
 ]
 
 [package.metadata]
@@ -399,6 +401,8 @@ requires-dist = [
     { name = "pdfplumber", specifier = ">=0.11.10" },
     { name = "praw", specifier = ">=8.0.3" },
     { name = "python-dotenv", specifier = ">=1.2.3" },
+    { name = "xmldict", specifier = ">=0.4.1" },
+    { name = "xmltodict", specifier = ">=1.0.4" },
 ]
 
 [[package]]
@@ -733,4 +737,19 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/d8/cb/a5abcc2891249f393827c650c6296660ce40374ac22d99ab9aea41f9d2a2/websocket_client-1.9.2.tar.gz", hash = "sha256:0fcb57545848be86992e128218fd96dd87a6769ffdb1a968dff79632b85604d0", size = 84110, upload-time = "2026-08-31T14:08:40.964Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/d5/d2/cc4dc1271e464942db7ee278baae2daa99ee77cb2af744025c04da585a3e/websocket_client-1.9.2-py3-none-any.whl", hash = "sha256:e1a673830a9c7bfa47b1cd3d5e4178f4c9651d80a4eab02c9c23a1c3ec6250ce", size = 95786, upload-time = "2026-08-31T14:08:39.899Z" },
+]
+
+[[package]]
+name = "xmldict"
+version = "0.4.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/4e/b6/b775a82bc2adb0614c5dbc08359becea7141f619f07c2391c0bffd0805fc/xmldict-0.4.1.tar.gz", hash = "sha256:0554789f1937151f95b4728016bdf228b50c3177d8faf2fdc9db809fccf7525f", size = 2580, upload-time = "2013-04-10T10:32:33.934Z" }
+
+[[package]]
+name = "xmltodict"
+version = "1.0.4"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/19/70/80f3b7c10d2630aa66414bf23d210386700aa390547278c789afa994fd7e/xmltodict-1.0.4.tar.gz", hash = "sha256:6d94c9f834dd9e44514162799d344d815a3a4faec913717a9ecbfa5be1bb8e61", size = 26124, upload-time = "2026-02-22T02:21:22.074Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/38/34/98a2f52245f4d47be93b580dae5f9861ef58977d73a79eb47c58f1ad1f3a/xmltodict-1.0.4-py3-none-any.whl", hash = "sha256:a4a00d300b0e1c59fc2bfccb53d7b2e88c32f200df138a0dd2229f842497026a", size = 13580, upload-time = "2026-02-22T02:21:21.039Z" },
 ]
