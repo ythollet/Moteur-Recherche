@@ -2,6 +2,7 @@
 
 import praw
 import urllib.request
+import pdfplumber
 # import xmltodict
 # import numpy as np
 # import json
@@ -15,7 +16,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-def func_get_data_reddit():
+def func_fetch_data_reddit():
 
     taille_docs=10
 
@@ -44,19 +45,21 @@ def func_get_data_reddit():
 
     print("\n\n Nombre de posts Reddit collectés :", len(textes_Reddit))
 
-    # Cnversion du texte Reddit en DataFrame
+    # Conversion du texte Reddit en DataFrame
     df_reddit = pd.DataFrame(textes_Reddit, columns = ['texte'])
-
-    # On crée une colonne 'id'
-    df_reddit = df_reddit.reset_index(names='id')
 
     # On spécifie l'origine des données (Reddit)
     df_reddit['origine'] = 'Reddit'
 
-    return df_reddit
+    df_reddit.to_csv('data/df_reddit.csv', index_label='id', sep='\t')
 
 
-def func_get_data_arxiv():
+def func_read_csv_reddit():
+
+    return pd.read_csv('data/df_reddit.csv', sep='\t')
+
+
+def func_fetch_data_arxiv():
 
     # Initialisation du client
     client = arxiv.Client(
@@ -71,21 +74,39 @@ def func_get_data_arxiv():
         max_results=5,
         sort_by=arxiv.SortCriterion.SubmittedDate
     )
-    print("t")
+
+    textes = []
 
     for result in client.results(search):
-        print(f"Titre : {result.title}")
-        print(f"Auteurs : {', '.join(a.name for a in result.authors)}")
-        print(f"Date : {result.published.date()}")
-        print(f"PDF : {result.pdf_url}")
-        print(f"Résumé : {result.summary[:150]}...")
-        print("-" * 40)
+
+        # Téléchargement du PDF
+        pdf_path = result.download_pdf(dirpath="papers")
+
+        with pdfplumber.open(pdf_path) as pdf:
+
+            for page in pdf.pages:
+
+                textes.append(page.extract_text or '')
+
+    df_arxiv = pd.DataFrame(textes, columns = ['text'])
+
+    df_arxiv['origine'] = 'Arxiv'
+
+    df_arxiv.to_csv('data/df_arxiv.csv', index_label = 'id', sep='\t')
+
+def func_read_csv_arxiv():
+
+    return pd.read_csv('data/df_arxiv.csv', sep='\t')
 
 
 def main():
 
-    df_reddit = func_get_data_reddit()
-    print(df_reddit)
+    if os.path.isfile('data/df_data_reddit.csv'):
+        func_fetch_data_reddit()
+    df_reddit = func_read_csv_reddit()
+
+    func_fetch_data_arxiv()
+    df_arxiv = func_read_csv_arxiv()
 
 
 main()
