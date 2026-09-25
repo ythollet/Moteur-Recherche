@@ -48,5 +48,7 @@ def main():
 
     df_reddit = _load_data()
 
+    print(len(df_reddit)) 
+
 
 main()
