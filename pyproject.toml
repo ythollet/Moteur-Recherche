@@ -11,3 +11,8 @@ dependencies = [
     "xmldict>=0.4.1",
     "xmltodict>=1.0.4",
 ]
+
+[dependency-groups]
+dev = [
+    "black>=26.5.1",
+]
