@@ -69,7 +69,9 @@ def main():
         # On supprimme toutes les lignes contenant moins de 100 caractères
         df.drop(index = list_id_row_to_drop)
 
-    print()
+    all_docs = ' '.join(df['text'])
+    pass
 
-
-main()
+    
+if __name__ == '__main__':
+    main()
