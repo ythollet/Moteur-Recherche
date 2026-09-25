@@ -51,4 +51,4 @@ def func_fetch_data_arxiv():
 
     df_arxiv["origine"] = "Arxiv"
 
-    df_arxiv.to_csv("data/df_arxiv.csv", index_label="id", sep="\t")
+    df_arxiv.to_csv("data/arxiv.csv", index=False, sep="\t")

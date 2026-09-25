@@ -10,29 +10,30 @@ from dotenv import load_dotenv
 # Librairies projet
 from API.reddit import func_fetch_data_reddit
 from API.arxiv import func_fetch_data_arxiv
+from Documment.class_document import Document
 
 load_dotenv() 
 
 def _load_data_reddit() -> pd.DataFrame:
 
     # Si les données Reddit ne sont pas dispo en local
-    if not os.path.isfile("data/df_reddit.csv"):
+    if not os.path.isfile("data/reddit.csv"):
 
         # On requête l'API Reddit pour les récupérer
         func_fetch_data_reddit()
 
-    return pd.read_csv("data/df_reddit.csv", sep="\t")
+    return pd.read_csv("data/reddit.csv", sep="\t")
 
 
 def _load_data_arxiv() -> pd.DataFrame:
 
     # Si les données Arxiv ne sont pas dispo en local
-    if not os.path.isfile("data/df_arxiv.csv"):
+    if not os.path.isfile("data/arxiv.csv"):
 
         # On requête l'API Arxiv pour les récupérer
         func_fetch_data_arxiv()
     
-    return pd.read_csv("data/df_arxiv.csv", sep="\t")
+    return pd.read_csv("data/arxiv.csv", sep="\t")
 
 
 def _load_data() -> pd.DataFrame:
@@ -40,13 +41,24 @@ def _load_data() -> pd.DataFrame:
     df_reddit = _load_data_reddit()
     df_arxiv = _load_data_arxiv()
 
-    return pd.concat([df_reddit, df_arxiv])
+    df = pd.concat([df_reddit, df_arxiv]).reset_index(name = 'id')
+
+    return df
     
 
 
 def main():
 
+    # Chargement des données Reddit et Arxiv en DataFrame
     df = _load_data()
+
+    dict_data = [
+        Document(
+            titre = # TODO - recupere davantage de metadonnées pour pouvoir init un Document
+        ) 
+        for row
+        in df.itertuples()
+    ]
 
     # 3.1
     print(f'Nombre de documents : {len(df)}\n') 

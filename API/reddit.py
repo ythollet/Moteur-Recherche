@@ -40,4 +40,4 @@ def func_fetch_data_reddit():
     # On spécifie l'origine des données (Reddit)
     df_reddit["origine"] = "Reddit"
 
-    df_reddit.to_csv("data/df_reddit.csv", index_label="id", sep="\t")
+    df_reddit.to_csv("data/reddit.csv", index=False, sep="\t")
