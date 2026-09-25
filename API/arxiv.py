@@ -22,8 +22,7 @@ def func_fetch_data_arxiv():
     req = urllib.request.Request(
         url,
         headers={
-            "User-Agent": "Moteur-Recherche/1.0",
-            "Accept": "application/atom+xml"
+            "User-Agent": "Moteur-Recherche/1.0"
         }
     )
 
