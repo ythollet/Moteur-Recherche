@@ -46,9 +46,18 @@ def _load_data() -> pd.DataFrame:
 
 def main():
 
-    df_reddit = _load_data()
+    df = _load_data()
 
-    print(len(df_reddit)) 
+    # 3.1
+    print(f'Nombre de documents : {len(df)}\n') 
+
+    # 3.2 
+    for row in df.itertuples():
+        print(f'Document {row.id}')
+        print(f'Mots : {len(row.text.split())}')
+        print(f'Phrases : {len(row.text.split('.'))}\n')
+
+    print()
 
 
 main()

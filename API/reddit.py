@@ -35,7 +35,7 @@ def func_fetch_data_reddit():
     # print("\n\n Nombre de posts Reddit collectés :", len(textes_Reddit))
 
     # Conversion du texte Reddit en DataFrame
-    df_reddit = pd.DataFrame(textes_Reddit, columns=["texte"])
+    df_reddit = pd.DataFrame(textes_Reddit, columns=["text"])
 
     # On spécifie l'origine des données (Reddit)
     df_reddit["origine"] = "Reddit"
