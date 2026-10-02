@@ -1,15 +1,12 @@
-# import numpy as np
-# import json
-# import pickle
-# import datetime
+import ast
+
 import pandas as pd
-import arxiv
 import os
 from dotenv import load_dotenv
 
 # Librairies projet
-from API.reddit import func_fetch_data_reddit
-from API.arxiv import func_fetch_data_arxiv
+from API.reddit import Reddit
+from API.arxiv import Arxiv
 from Documment.class_document import Document
 
 load_dotenv() 
@@ -20,7 +17,7 @@ def _load_data_reddit() -> pd.DataFrame:
     if not os.path.isfile("data/reddit.csv"):
 
         # On requête l'API Reddit pour les récupérer
-        func_fetch_data_reddit()
+        Reddit.main_fetch_data()
 
     return pd.read_csv("data/reddit.csv", sep="\t")
 
@@ -31,9 +28,14 @@ def _load_data_arxiv() -> pd.DataFrame:
     if not os.path.isfile("data/arxiv.csv"):
 
         # On requête l'API Arxiv pour les récupérer
-        func_fetch_data_arxiv()
-    
-    return pd.read_csv("data/arxiv.csv", sep="\t")
+        Arxiv.main_fetch_data()
+
+    df = pd.read_csv(
+        "data/arxiv.csv",
+        sep = "\t",
+        converters = {"auteurs": ast.literal_eval})
+
+    return df
 
 
 def _load_data() -> pd.DataFrame:
@@ -41,7 +43,10 @@ def _load_data() -> pd.DataFrame:
     df_reddit = _load_data_reddit()
     df_arxiv = _load_data_arxiv()
 
-    df = pd.concat([df_reddit, df_arxiv]).reset_index(names = 'id')
+    df = pd.concat(
+        [df_reddit, df_arxiv],
+        ignore_index = True
+    ).reset_index(names = 'id')
 
     return df
     
@@ -51,10 +56,10 @@ def main():
 
     # Chargement des données Reddit et Arxiv en DataFrame
     df = _load_data()
-    #
+
     # dict_data = [
     #     Document(
-    #         titre = # TODO - recupere davantage de metadonnées pour pouvoir init un Document
+    #         titre = row['']
     #     )
     #     for row
     #     in df.itertuples()

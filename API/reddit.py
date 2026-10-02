@@ -2,42 +2,45 @@ import pandas as pd
 import praw
 import os
 
-def func_fetch_data_reddit():
-    """
-    Récupère les données depuis Reddit
-    """
+from Documment.class_document import Document
 
-    # Nombre de documents a récupérer
-    taille_docs = 10
+class Reddit:
 
-    # Récupération de textes depuis Reddit
-    reddit = praw.Reddit(
-        client_id=os.getenv("CLIENT_ID"),
-        client_secret=os.getenv("CLIENT_SECRET"),
-        user_agent=os.getenv("USER_AGENT"),
-    )
+    @staticmethod
+    def main_fetch_data():
+        """
+        Récupère les données depuis Reddit
+        """
 
-    subr = reddit.subreddit("vosfinances")
+        # Nombre de documents a récupérer
+        taille_docs = 10
 
-    posts = list(subr.hot(limit=taille_docs))
+        # Récupération de textes depuis Reddit
+        reddit = praw.Reddit(
+            client_id=os.getenv("CLIENT_ID"),
+            client_secret=os.getenv("CLIENT_SECRET"),
+            user_agent=os.getenv("USER_AGENT"),
+        )
 
-    textes_Reddit = []
-    for post in posts:
+        subr = reddit.subreddit("vosfinances")
 
-        # Titre toujours présent
-        texte = post.title.replace("\n", " ") + ". "
+        posts = list(subr.hot(limit=taille_docs))
 
-        if post.selftext:
-            texte += post.selftext.replace("\n", " ")
+        documents_reddit = []
+        for post in posts:
 
-        textes_Reddit.append(texte)
+            document = Document(
+                titre = post.title.replace("\n", " "),
+                texte = post.selftext.replace("\n", " "),
+                url = post.url,
+                date = post.created_datetime,
+                auteurs = post.author,
+                origine = 'Reddit'
+            )
 
-    # print("\n\n Nombre de posts Reddit collectés :", len(textes_Reddit))
+            documents_reddit.append(document)
 
-    # Conversion du texte Reddit en DataFrame
-    df_reddit = pd.DataFrame(textes_Reddit, columns=["text"])
+        # Conversion du texte Reddit en DataFrame
+        df_reddit = pd.DataFrame(documents_reddit)
 
-    # On spécifie l'origine des données (Reddit)
-    df_reddit["origine"] = "Reddit"
-
-    df_reddit.to_csv("data/reddit.csv", index=False, sep="\t")
+        df_reddit.to_csv("data/reddit.csv", index=False, sep="\t")
