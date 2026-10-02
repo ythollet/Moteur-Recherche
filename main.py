@@ -41,7 +41,7 @@ def _load_data() -> pd.DataFrame:
     df_reddit = _load_data_reddit()
     df_arxiv = _load_data_arxiv()
 
-    df = pd.concat([df_reddit, df_arxiv]).reset_index(name = 'id')
+    df = pd.concat([df_reddit, df_arxiv]).reset_index(names = 'id')
 
     return df
     
@@ -51,14 +51,14 @@ def main():
 
     # Chargement des données Reddit et Arxiv en DataFrame
     df = _load_data()
-
-    dict_data = [
-        Document(
-            titre = # TODO - recupere davantage de metadonnées pour pouvoir init un Document
-        ) 
-        for row
-        in df.itertuples()
-    ]
+    #
+    # dict_data = [
+    #     Document(
+    #         titre = # TODO - recupere davantage de metadonnées pour pouvoir init un Document
+    #     )
+    #     for row
+    #     in df.itertuples()
+    # ]
 
     # 3.1
     print(f'Nombre de documents : {len(df)}\n') 
@@ -70,7 +70,7 @@ def main():
     for row in df.itertuples():
         print(f'Document {row.id}')
         print(f'Mots : {len(row.text.split())}')
-        print(f'Phrases : {len(row.text.split('.'))}\n')
+        print(f'Phrases : {len(row.text.split("."))}\n')
 
         # Si le document contient moins de 100 caractères
         if len(row.text) < 100:
