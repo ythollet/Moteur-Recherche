@@ -57,13 +57,18 @@ def main():
     # Chargement des données Reddit et Arxiv en DataFrame
     df = _load_data()
 
-    # dict_data = [
-    #     Document(
-    #         titre = row['']
-    #     )
-    #     for row
-    #     in df.itertuples()
-    # ]
+    dict_documents = {
+        row.Index: Document(
+            titre = row.titre,
+            auteurs = row.auteurs,
+            texte = row.texte,
+            origine = row.origine,
+            url = row.url,
+            date = row.date
+        )
+        for row
+        in df.itertuples()
+    }
 
     # 3.1
     print(f'Nombre de documents : {len(df)}\n') 
