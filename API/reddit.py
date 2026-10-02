@@ -1,3 +1,5 @@
+import html
+
 import pandas as pd
 import praw
 import os
@@ -5,6 +7,16 @@ import os
 from Documment.class_document import Document
 
 class Reddit:
+
+    @staticmethod
+    def _clean_str(
+        in_str: str
+    ) -> str:
+
+        # Décodage des entités HTML et normalisation des espaces.
+        return " ".join(html.unescape(in_str).split())
+
+
 
     @staticmethod
     def main_fetch_data():
@@ -30,8 +42,12 @@ class Reddit:
         for post in posts:
 
             document = Document(
-                titre = post.title.replace("\n", " "),
-                texte = post.selftext.replace("\n", " "),
+                titre = Reddit._clean_str(
+                    in_str = post.title
+                ),
+                texte = Reddit._clean_str(
+                    in_str = post.selftext
+                ),
                 url = post.url,
                 date = post.created_datetime,
                 auteurs = post.author,

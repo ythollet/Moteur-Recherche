@@ -73,20 +73,25 @@ def main():
 
     # 3.2 
     for row in df.itertuples():
+
+        if pd.isna(row.texte):
+            list_id_row_to_drop.append(row.id)
+            continue
+
         print(f'Document {row.id}')
-        print(f'Mots : {len(row.text.split())}')
-        print(f'Phrases : {len(row.text.split("."))}\n')
+        print(f'Mots : {len(row.texte.split())}')
+        print(f'Phrases : {len(row.texte.split("."))}\n')
 
         # Si le document contient moins de 100 caractères
-        if len(row.text) < 100:
+        if len(row.texte) < 100:
 
             # On l'ajoute à la liste des éléments à supprimer
             list_id_row_to_drop.append(row.id)
 
-        # On supprimme toutes les lignes contenant moins de 100 caractères
-        df.drop(index = list_id_row_to_drop)
+    # On supprimme toutes les lignes contenant moins de 100 caractères
+    df.drop(index = list_id_row_to_drop, inplace = True)
 
-    all_docs = ' '.join(df['text'])
+    all_docs = ' '.join(df['texte'])
     pass
 
     
