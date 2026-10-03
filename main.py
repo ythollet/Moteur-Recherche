@@ -7,7 +7,8 @@ from dotenv import load_dotenv
 # Librairies projet
 from API.reddit import Reddit
 from API.arxiv import Arxiv
-from Documment.class_document import Document
+from Author.author import Author
+from Documment.document import Document
 
 load_dotenv() 
 
@@ -57,18 +58,7 @@ def main():
     # Chargement des données Reddit et Arxiv en DataFrame
     df = _load_data()
 
-    dict_documents = {
-        row.Index: Document(
-            titre = row.titre,
-            auteurs = row.auteurs,
-            texte = row.texte,
-            origine = row.origine,
-            url = row.url,
-            date = row.date
-        )
-        for row
-        in df.itertuples()
-    }
+
 
     # 3.1
     print(f'Nombre de documents : {len(df)}\n') 
@@ -97,8 +87,47 @@ def main():
     df.drop(index = list_id_row_to_drop, inplace = True)
 
     all_docs = ' '.join(df['texte'])
-    pass
 
-    
+    dict_documents = {
+        row.Index: Document(
+            titre = row.titre,
+            list_auteurs= row.list_auteurs,
+            texte = row.texte,
+            origine = row.origine,
+            url = row.url,
+            date = row.date
+        )
+        for row
+        in df.itertuples()
+    }
+
+
+    dict_authors: dict[str, Author] = {}
+
+    # Pour chaque document
+    for document in dict_documents.values():
+
+        # Pour chaque autheur de la liste
+        for author in document.list_auteurs:
+
+            # Si l'auteur est déja dans le dictionnaire
+            if author in dict_authors.keys():
+
+                dict_authors[author].add_document(
+                    in_document = document
+                )
+
+            # Si l'auteur n'est pas dans le dictionnaire
+            else:
+
+                dict_authors[author] = Author(
+                    name = author,
+                    nb_docs = 1,
+                    productions = [document],
+                )
+
+
+
+
 if __name__ == '__main__':
     main()

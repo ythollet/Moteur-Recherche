@@ -1,27 +1,26 @@
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Optional
 
 
 @dataclass
 class Document:
 
-    titre: Optional[str]
+    titre: str
     """ Titre du document """
 
-    auteurs: Optional[list[str]]
+    list_auteurs: list[str]
     """ Nom de l’auteur (ou des autheurs) """
 
-    date: Optional[datetime]
+    date: datetime
     """ Date de publication """
 
-    url: Optional[datetime]
+    url: str
     """ URL source """
 
-    texte: Optional[str]
+    texte: str
     """ Contenu textuel du document """
 
-    origine : Optional[str]
+    origine : str
     """ Source du document """
 
     def infos(self):
@@ -39,7 +38,7 @@ class Document:
 if __name__ == '__main__':
 
     document = Document(
-        auteur = 'Jean michel',
+        list_auteurs = ['Jean michel'],
         date = datetime.now(),
         texte = 'blablabla',
         titre = 'titre1',

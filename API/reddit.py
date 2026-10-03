@@ -4,7 +4,7 @@ import pandas as pd
 import praw
 import os
 
-from Documment.class_document import Document
+from Documment.document import Document
 
 class Reddit:
 
@@ -50,7 +50,7 @@ class Reddit:
                 ),
                 url = post.url,
                 date = post.created_datetime,
-                auteurs = post.author,
+                list_auteurs= post.author,
                 origine = 'Reddit'
             )
 

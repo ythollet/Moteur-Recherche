@@ -4,7 +4,7 @@ from typing import Optional
 import xmltodict
 import pandas as pd
 
-from Documment.class_document import Document
+from Documment.document import Document
 
 class Arxiv:
 
@@ -13,13 +13,13 @@ class Arxiv:
         in_entry: dict
     ) -> Optional[list[str]]:
 
-        auteurs = in_entry.get("author")
+        auteurs = in_entry["author"]
 
         if isinstance(auteurs, list):
             return [e['name'] for e in auteurs]
 
         elif isinstance(in_entry, dict):
-            return [auteurs.get("name")]
+            return [auteurs["name"]]
 
         else:
             raise ValueError("Erreur de récupération du nom de l'auteur")
@@ -57,7 +57,7 @@ class Arxiv:
 
             dict_arxiv = xmltodict.parse(xml_data)
 
-        entries = dict_arxiv["feed"].get("entry", [])
+        entries = dict_arxiv["feed"]["entry"]
         if isinstance(entries, dict):
             entries = [entries]
 
@@ -68,12 +68,12 @@ class Arxiv:
             texte = entry["summary"].replace("\n", " ").strip()
 
             document = Document(
-                auteurs = Arxiv.get_authors_from_entry(entry),
-                texte = entry.get('summary').replace("\n", " ").strip(),
-                url = entry.get("id"),
+                list_auteurs= Arxiv.get_authors_from_entry(entry),
+                texte = entry['summary'].replace("\n", " ").strip(),
+                url = entry["id"],
                 origine = 'Arxiv',
-                date = entry.get("published"),
-                titre = entry.get("title")
+                date = entry["published"],
+                titre = entry["title"]
             )
             documents_arxiv.append(document)
 
