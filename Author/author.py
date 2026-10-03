@@ -11,8 +11,13 @@ class Author:
     productions: dict[int, Document]
     """ Documents écrits par l’auteur. """
 
-    nb_docs: int
-    """ Nombre de documents publiés """
+
+
+    def nb_docs(
+        self
+    ):
+        """ Renvoie le nombre de documents publiés """
+        return len(self.productions)
 
     def add_document(
         self,
@@ -20,7 +25,6 @@ class Author:
         in_id_document: int,
     ) -> None:
 
-        self.nb_docs += 1
         self.productions |= {in_id_document : in_document}
 
     def __str__(self) -> str:

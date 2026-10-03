@@ -1,3 +1,4 @@
+import ast
 import html
 
 import pandas as pd
@@ -59,4 +60,20 @@ class Reddit:
         # Conversion du texte Reddit en DataFrame
         df_reddit = pd.DataFrame(documents_reddit)
 
-        df_reddit.to_csv("data/reddit.csv", index=False, sep="\t")
+        df_reddit.to_csv("RawData/reddit.csv", index=False, sep="\t")
+
+    @staticmethod
+    def _load_data_reddit() -> pd.DataFrame:
+
+        # Si les données Reddit ne sont pas dispo en local
+        if not os.path.isfile("RawData/reddit.csv"):
+            # On requête l'API Reddit pour les récupérer
+            Reddit.main_fetch_data()
+
+        df = pd.read_csv(
+            "RawData/reddit.csv",
+            sep="\t",
+            converters={"list_auteurs": ast.literal_eval}
+        )
+
+        return df

@@ -1,3 +1,5 @@
+import ast
+import os
 import urllib
 from typing import Optional
 
@@ -79,4 +81,21 @@ class Arxiv:
 
         df_arxiv = pd.DataFrame(documents_arxiv)
 
-        df_arxiv.to_csv("data/arxiv.csv", index=False, sep="\t")
+        df_arxiv.to_csv("RawData/arxiv.csv", index=False, sep="\t")
+
+    @staticmethod
+    def load_data_arxiv() -> pd.DataFrame:
+
+        # Si les données Arxiv ne sont pas dispo en local
+        if not os.path.isfile("RawData/arxiv.csv"):
+
+            # On requête l'API Arxiv pour les récupérer
+            Arxiv.main_fetch_data()
+
+        df = pd.read_csv(
+            "RawData/arxiv.csv",
+            sep = "\t",
+            converters = {"list_auteurs": ast.literal_eval}
+        )
+
+        return df

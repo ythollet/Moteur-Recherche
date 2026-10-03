@@ -12,60 +12,29 @@ from Documment.document import Document
 
 load_dotenv() 
 
-def _load_data_reddit() -> pd.DataFrame:
-
-    # Si les données Reddit ne sont pas dispo en local
-    if not os.path.isfile("data/reddit.csv"):
-
-        # On requête l'API Reddit pour les récupérer
-        Reddit.main_fetch_data()
-
-    df = pd.read_csv(
-        "data/reddit.csv",
-        sep = "\t",
-        converters = {"list_auteurs": ast.literal_eval}
-    )
-
-    return df
 
 
-def _load_data_arxiv() -> pd.DataFrame:
+def _load_data(
+    self
+) -> pd.DataFrame:
 
-    # Si les données Arxiv ne sont pas dispo en local
-    if not os.path.isfile("data/arxiv.csv"):
-
-        # On requête l'API Arxiv pour les récupérer
-        Arxiv.main_fetch_data()
-
-    df = pd.read_csv(
-        "data/arxiv.csv",
-        sep = "\t",
-        converters = {"list_auteurs": ast.literal_eval}
-    )
-
-    return df
-
-
-def _load_data() -> pd.DataFrame:
-
-    df_reddit = _load_data_reddit()
-    df_arxiv = _load_data_arxiv()
+    df_reddit = Reddit._load_data_reddit()
+    df_arxiv = Arxiv.load_data_arxiv()
 
     df = pd.concat(
         [df_reddit, df_arxiv],
-        ignore_index = True
-    ).reset_index(names = 'id')
+        ignore_index=True
+    ).reset_index(names='id')
 
     return df
-    
+
+
 
 
 def main():
 
     # Chargement des données Reddit et Arxiv en DataFrame
     df = _load_data()
-
-
 
     # 3.1
     print(f'Nombre de documents : {len(df)}\n') 
@@ -130,8 +99,7 @@ def main():
 
                 dict_authors[author] = Author(
                     name = author,
-                    productions = {id_document: document},
-                    nb_docs = 1
+                    productions = {id_document: document}
                 )
 
 
