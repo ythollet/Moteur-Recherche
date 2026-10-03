@@ -18,7 +18,7 @@ class Arxiv:
         if isinstance(auteurs, list):
             return [e['name'] for e in auteurs]
 
-        elif isinstance(in_entry, dict):
+        elif isinstance(auteurs, dict):
             return [auteurs["name"]]
 
         else:

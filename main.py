@@ -20,7 +20,13 @@ def _load_data_reddit() -> pd.DataFrame:
         # On requête l'API Reddit pour les récupérer
         Reddit.main_fetch_data()
 
-    return pd.read_csv("data/reddit.csv", sep="\t")
+    df = pd.read_csv(
+        "data/reddit.csv",
+        sep = "\t",
+        converters = {"list_auteurs": ast.literal_eval}
+    )
+
+    return df
 
 
 def _load_data_arxiv() -> pd.DataFrame:
@@ -34,7 +40,8 @@ def _load_data_arxiv() -> pd.DataFrame:
     df = pd.read_csv(
         "data/arxiv.csv",
         sep = "\t",
-        converters = {"auteurs": ast.literal_eval})
+        converters = {"list_auteurs": ast.literal_eval}
+    )
 
     return df
 
@@ -88,10 +95,10 @@ def main():
 
     all_docs = ' '.join(df['texte'])
 
-    dict_documents = {
-        row.Index: Document(
+    dict_documents: dict[int, Document] = {
+        int(row.Index): Document(
             titre = row.titre,
-            list_auteurs= row.list_auteurs,
+            list_auteurs = row.list_auteurs,
             texte = row.texte,
             origine = row.origine,
             url = row.url,
@@ -105,7 +112,7 @@ def main():
     dict_authors: dict[str, Author] = {}
 
     # Pour chaque document
-    for document in dict_documents.values():
+    for id_document, document in dict_documents.items():
 
         # Pour chaque autheur de la liste
         for author in document.list_auteurs:
@@ -114,7 +121,8 @@ def main():
             if author in dict_authors.keys():
 
                 dict_authors[author].add_document(
-                    in_document = document
+                    in_document = document,
+                    in_id_document = id_document
                 )
 
             # Si l'auteur n'est pas dans le dictionnaire
@@ -122,8 +130,8 @@ def main():
 
                 dict_authors[author] = Author(
                     name = author,
-                    nb_docs = 1,
-                    productions = [document],
+                    productions = {id_document: document},
+                    nb_docs = 1
                 )
 
 

@@ -34,7 +34,7 @@ class Reddit:
             user_agent=os.getenv("USER_AGENT"),
         )
 
-        subr = reddit.subreddit("vosfinances")
+        subr = reddit.subreddit("personalfinance")
 
         posts = list(subr.hot(limit=taille_docs))
 
@@ -50,7 +50,7 @@ class Reddit:
                 ),
                 url = post.url,
                 date = post.created_datetime,
-                list_auteurs= post.author,
+                list_auteurs= [post.author.name],
                 origine = 'Reddit'
             )
 
