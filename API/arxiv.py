@@ -6,14 +6,14 @@ from typing import Optional
 import xmltodict
 import pandas as pd
 
-from Documment.document import Document
+from Documment.arxiv_document import ArxivDocument
 
 class Arxiv:
 
     @staticmethod
     def get_authors_from_entry(
         in_entry: dict
-    ) -> Optional[list[str]]:
+    ) -> list[str]:
 
         auteurs = in_entry["author"]
 
@@ -24,7 +24,8 @@ class Arxiv:
             return [auteurs["name"]]
 
         else:
-            raise ValueError("Erreur de récupération du nom de l'auteur")
+            print("Erreur de récupération du nom de l'auteur")
+            return []
 
 
 
@@ -66,10 +67,12 @@ class Arxiv:
         print("Nombre d'articles Arxiv trouvés :", len(entries))
 
         documents_arxiv = []
+
         for entry in entries:
+
             texte = entry["summary"].replace("\n", " ").strip()
 
-            document = Document(
+            document = ArxivDocument(
                 list_auteurs= Arxiv.get_authors_from_entry(entry),
                 texte = entry['summary'].replace("\n", " ").strip(),
                 url = entry["id"],
@@ -77,6 +80,7 @@ class Arxiv:
                 date = entry["published"],
                 titre = entry["title"]
             )
+
             documents_arxiv.append(document)
 
         df_arxiv = pd.DataFrame(documents_arxiv)

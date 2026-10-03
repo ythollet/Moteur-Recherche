@@ -8,9 +8,6 @@ class Document:
     titre: str
     """ Titre du document """
 
-    list_auteurs: list[str]
-    """ Nom de l’auteur (ou des autheurs) """
-
     date: datetime
     """ Date de publication """
 
@@ -35,10 +32,11 @@ class Document:
 
 
 
+
+
 if __name__ == '__main__':
 
     document = Document(
-        list_auteurs = ['Jean michel'],
         date = datetime.now(),
         texte = 'blablabla',
         titre = 'titre1',

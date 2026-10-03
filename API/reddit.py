@@ -6,6 +6,8 @@ import praw
 import os
 
 from Documment.document import Document
+from Documment.reddit_document import RedditDocument
+
 
 class Reddit:
 
@@ -42,7 +44,7 @@ class Reddit:
         documents_reddit = []
         for post in posts:
 
-            document = Document(
+            document = RedditDocument(
                 titre = Reddit._clean_str(
                     in_str = post.title
                 ),
@@ -51,8 +53,9 @@ class Reddit:
                 ),
                 url = post.url,
                 date = post.created_datetime,
-                list_auteurs= [post.author.name],
-                origine = 'Reddit'
+                auteur = post.author.name,
+                origine = 'Reddit',
+                nb_comments = post.num_comments,
             )
 
             documents_reddit.append(document)
