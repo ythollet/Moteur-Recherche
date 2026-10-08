@@ -1,7 +1,11 @@
 import ast
+import re
 from pathlib import Path
+from typing import Optional
+
 import pandas as pd
 
+from API.load_reddit_arxiv import load_raw_data
 from Author.author import Author
 from Documment.class_arxiv_document import ArxivDocument
 from Documment.class_document import Document
@@ -24,27 +28,51 @@ class Corpus:
     authors: dict[str, Author]
     """ Auteurs des documents du corpus, indexés par leur nom """
 
+    __all_docs: Optional[str] = None
+    """ contient tous les documents concaténés en une seule chaine de caractère """
+
+    __nb_docs: Optional[int] = None
+
     _instance = None
     """ Instance unique du corpus """
 
+    @property
+    def all_docs(self):
+
+        if self.__all_docs is None:
+
+            # Assemble les textes retenus en les séparant par un espace.
+            self.__all_docs = ' '.join(
+                document.texte
+                for document
+                in self.documents.values()
+            )
+
+        return self.__all_docs
+
+    @property
+    def nb_docs(self):
+
+        if self.__nb_docs is None:
+            self.__nb_docs = len(self.documents)
+        else:
+            return self.nb_docs
+
+
     def __init__(
         self,
-        in_nom: str,
-        in_authors: dict[str, Author],
-        in_documents: dict[int, Document]
+        nom: str
     ):
 
         # Si l'objet a déjà été initialisé, on s'arrête.
         if getattr(self, "_initialise", False):
             return
 
-        self.nom = in_nom
-        self.documents = in_documents
-        self.authors = in_authors
+        self.nom = nom
 
-        self.in_nb_docs = len(in_documents)
         self.id_document = 0
         self._initialise = True
+
 
 
     def __new__(cls, *args, **kwargs):
@@ -143,33 +171,54 @@ class Corpus:
         :raises Exception: Si un document indique une source non prise en charge
         """
 
-        # literal_eval restaure les listes d'auteurs enregistrées sous forme de texte.
-        df = pd.read_csv(
+        path_coprus = (
             Path(__file__)
-            .resolve().parent.parent / "CorpusData" / f"{self.nom}.csv",
-            sep = "\t",
-            converters = {
-                "list_auteurs": lambda value: ast.literal_eval(value) if value
-                else []
-            },
-            dtype = {
-                "id": int,
-                "titre": str,
-                "url": str,
-                "texte": str,
-                "type": str,
-                "auteur": str,
-                "nb_comments": "Int64"
-            },
-            parse_dates = ["date"]
+            .resolve().parent.parent / "CorpusData" / f"{self.nom}.csv"
         )
 
-        # Initialise les attributs
-        self.id_document = len(df)
-        self.authors = {}
-        self._load_helper_document(in_df = df)
-        self._load_helper_list_auteurs()
+        # Si le Corpus est sur le disque local
+        if path_coprus.is_file():
 
+            # literal_eval restaure les listes d'auteurs enregistrées sous forme de texte.
+            df = pd.read_csv(
+                path_coprus,
+                sep = "\t",
+                converters = {
+                    "list_auteurs": lambda value: ast.literal_eval(value) if value
+                    else []
+                },
+                dtype = {
+                    "id": int,
+                    "titre": str,
+                    "url": str,
+                    "texte": str,
+                    "type": str,
+                    "auteur": str,
+                    "nb_comments": "Int64"
+                },
+                parse_dates = ["date"]
+            )
+
+            # Initialise les attributs
+            self.id_document = len(df)
+            self.authors = {}
+            self._load_helper_document(in_df = df)
+            self._load_helper_list_auteurs()
+
+
+        # Si le corpus n'est pas présent en local
+        else:
+
+            # Chargement des données Reddit et Arxiv en DataFrame
+            df = load_raw_data()
+
+            # Initialise les attributs
+            self.id_document = len(df)
+            self.authors = {}
+            self._load_helper_document(in_df = df)
+            self._load_helper_list_auteurs()
+
+            self.save()
 
     def _load_helper_document(
         self,
@@ -246,8 +295,24 @@ class Corpus:
             # On affiche le titre et le type
             print(f'{d.titre} - {d.get_type()}\n')
 
+    def search(
+        self,
+        in_word: str
+    ) -> Optional[list[str]]:
+
+        res = re.findall(rf'\w*\s*\b{in_word}\b\s*\w*', self.all_docs)
+
+        return res
+
+
+
+
+
 
 if __name__ == "__main__":
+
+
+
     from datetime import datetime
 
     # Exemple indépendant des API, avec des documents Reddit et Arxiv.
@@ -272,9 +337,9 @@ if __name__ == "__main__":
     }
 
     corpus = Corpus(
-        in_nom = "test",
-        in_authors = {},
-        in_documents = documents,
+        nom = "test",
+        authors = {},
+        documents = documents,
     )
 
     # Résultat attendu : documents 2, 3 (les deux plus récents).
@@ -291,9 +356,9 @@ if __name__ == "__main__":
 
     # Un nouveau corpus vide permet de vérifier que load restaure les données.
     corpus_charge = Corpus(
-        in_nom = "test",
-        in_authors = {},
-        in_documents = {},
+        nom = "test",
+        authors = {},
+        documents = {},
     )
     corpus_charge.load()
 
@@ -316,3 +381,4 @@ if __name__ == "__main__":
         )
 
     corpus_charge.show_articles()
+
