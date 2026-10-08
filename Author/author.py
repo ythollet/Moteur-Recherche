@@ -1,6 +1,7 @@
 from dataclasses import dataclass
+from typing import Optional
 
-from Documment.document import Document
+from Documment.class_document import Document
 
 
 @dataclass
@@ -11,9 +12,19 @@ class Author:
     """ Nom de l'auteur """
 
     productions: dict[int, Document]
-
     """ Documents écrits par l'auteur, associés à leur identifiant dans le 
     corpus """
+
+    __nb_docs: Optional[int] = None
+    """ Nombre de documents écrits par l'auteur """
+    @property
+    def nb_docs(
+        self
+    ) -> int:
+        if self.__nb_docs is None:
+            return len(self.productions)
+        else:
+            return self.__nb_docs
 
 
     def __str__(self) -> str:
@@ -23,15 +34,6 @@ class Author:
                  f"production: {self.productions}")
 
         return chain
-
-
-    def nb_docs(
-        self
-    ) -> int:
-        """
-        Renvoie le nombre de documents présents dans les productions.
-        """
-        return len(self.productions)
 
 
     def add_document(
@@ -76,7 +78,7 @@ class Author:
         )
 
         # Calucle la taille moyenne des documents
-        taille_moyenne_docs = taille_totale_docs / author.nb_docs
+        taille_moyenne_docs = taille_totale_docs / author.nb_docs()
 
         # Affiche les statistiques
         print(

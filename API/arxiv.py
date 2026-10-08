@@ -5,7 +5,7 @@ from typing import Any
 import xmltodict
 import pandas as pd
 
-from Documment.arxiv_document import ArxivDocument
+from Documment.class_arxiv_document import ArxivDocument
 
 
 class Arxiv:
@@ -55,7 +55,7 @@ class Arxiv:
 
         # xmltodict renvoie un dictionnaire pour une entrée unique : on
         # convertit en liste pour consevrer le même format
-        articles = dict_arxiv["feed"]["article"]
+        articles = dict_arxiv["feed"]["entry"]
         if isinstance(articles, dict):
             articles = [articles]
 

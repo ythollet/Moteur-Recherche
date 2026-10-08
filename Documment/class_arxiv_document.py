@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from Documment.document import Document
+from Documment.class_document import Document
 
 
 @dataclass

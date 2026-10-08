@@ -4,7 +4,7 @@ import pandas as pd
 import praw
 import os
 
-from Documment.reddit_document import RedditDocument
+from Documment.class_reddit_document import RedditDocument
 
 
 class Reddit:
