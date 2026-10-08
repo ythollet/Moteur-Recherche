@@ -24,7 +24,7 @@ def main():
 
     corpus.load()
 
-    corpus.search('the')
+    corpus.concorde('the',5)
 
 
 

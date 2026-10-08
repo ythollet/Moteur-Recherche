@@ -305,6 +305,19 @@ class Corpus:
         return res
 
 
+    def concorde(
+        self,
+        in_word: str,
+        in_nb_char_context: int
+    ) -> Optional[list[str]]:
+
+        # TODO - res est vide
+        res = re.findall(
+            rf'(.{{0,{in_nb_char_context}}})\s*\b(in_word)\b\s*(.{{0,{in_nb_char_context}}})',
+            self.all_docs
+        )
+
+        pass
 
 
 
