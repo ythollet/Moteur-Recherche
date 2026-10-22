@@ -309,15 +309,16 @@ class Corpus:
         self,
         in_word: str,
         in_nb_char_context: int
-    ) -> Optional[list[str]]:
+    ) -> pd.DataFrame:
 
-        # TODO - res est vide
         res = re.findall(
-            rf'(.{{0,{in_nb_char_context}}})\s*\b(in_word)\b\s*(.{{0,{in_nb_char_context}}})',
+            rf'(.{{0,{in_nb_char_context}}})\s*\b({re.escape(in_word)})\b\s*(.{{0,{in_nb_char_context}}})',
             self.all_docs
         )
 
-        pass
+        df = pd.DataFrame(res, columns=['contexte_gauche', 'mot_recherche', 'contexte_droit'])
+
+        return df
 
 
 
