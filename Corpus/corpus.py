@@ -1,5 +1,7 @@
 import ast
 import re
+import string
+from collections import Counter
 from pathlib import Path
 from typing import Optional
 
@@ -37,7 +39,7 @@ class Corpus:
     """ Instance unique du corpus """
 
     @property
-    def all_docs(self):
+    def all_docs(self) -> str:
 
         if self.__all_docs is None:
 
@@ -311,14 +313,65 @@ class Corpus:
         in_nb_char_context: int
     ) -> pd.DataFrame:
 
+        # Si la variable contenant les documents est vide
+        if not self.all_docs:
+            raise ValueError('la variable self.all_docs est vide')
+
         res = re.findall(
-            rf'(.{{0,{in_nb_char_context}}})\s*\b({re.escape(in_word)})\b\s*(.{{0,{in_nb_char_context}}})',
+            rf'(.{{0,{in_nb_char_context}}})\s*\b({re.escape(in_word)})\b\s*'
+            rf'(.{{0,{in_nb_char_context}}})',
             self.all_docs
         )
 
-        df = pd.DataFrame(res, columns=['contexte_gauche', 'mot_recherche', 'contexte_droit'])
+        df = pd.DataFrame(
+            res,
+            columns=['contexte_gauche', 'mot_recherche', 'contexte_droit']
+        )
 
         return df
+
+    def _nettoyer_texte(
+        self,
+        in_str: str
+    ) -> str:
+
+        texte = re.sub(rf'\d+|\n+|\t+|[{re.escape(string.punctuation)}]', ' ', in_str).lower()
+
+        return texte
+
+
+
+    def stats(
+        self,
+        n: int = 10
+    ):
+        """
+        Affiche:
+        - le nombre de mots différents dans le corpus
+        - les "n" mots les plus fréquents
+
+        :param n: nombre de mots à afficher pour le top des mots les plus
+          fréquents
+        """
+
+        dict_vocabulaire = {}
+
+        for d, document in self.documents.items():
+
+            texte = self._nettoyer_texte(document.texte)
+
+            list_mots = texte.split()
+            set_mots = set(list_mots)
+
+            dict_vocabulaire.update(d, set_mots)
+
+
+
+
+        # print(f'Top {n} mots les plus fréquents: {Counter(list_mots)}')
+        # print(f'Nombre de mots différents dans le corpus: {len(set_mots)}')
+
+        pass
 
 
 
@@ -395,4 +448,3 @@ if __name__ == "__main__":
         )
 
     corpus_charge.show_articles()
-
