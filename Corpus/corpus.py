@@ -355,21 +355,37 @@ class Corpus:
         """
 
         dict_vocabulaire = {}
+        set_mots_uniques = set()
 
         for d, document in self.documents.items():
 
             texte = self._nettoyer_texte(document.texte)
 
             list_mots = texte.split()
-            set_mots = set(list_mots)
+            set_mots_uniques |= set(list_mots)
 
-            dict_vocabulaire.update(d, set_mots)
+            dict_vocabulaire[d] = list_mots
 
+        list_all_mots = [
+            mot
+            for list_mots_document in dict_vocabulaire.values()
+            for mot in list_mots_document
+        ]
 
+        df_freq = pd.DataFrame(
+            list_all_mots,
+            columns = ['mot']
+        )
 
+        df_freq = (
+            df_freq
+            .groupby('mot')
+            .agg(nb_occ_total = ('mot', 'count'))
+            .sort_values('count', ascending=False)
+        )
 
-        # print(f'Top {n} mots les plus fréquents: {Counter(list_mots)}')
-        # print(f'Nombre de mots différents dans le corpus: {len(set_mots)}')
+        print(f'Top {n} mots les plus fréquents: {df_freq.head(n)}')
+        print(f'Nombre de mots différents dans le corpus: {len(set_mots_uniques)}')
 
         pass
 
