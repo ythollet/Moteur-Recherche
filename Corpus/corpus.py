@@ -386,6 +386,13 @@ class Corpus:
             .sort_values('nb_occ_total', ascending=False)
         )
 
+        df_freq['id_mot'] = range(0, len(df_freq))
+
+        dict_vocab = df_freq.to_dict(orient='index')
+        dict_vocab = dict(sorted(dict_vocab.items(), key = lambda x: x[0]))
+
+        pass
+
         print(f'Top {n} mots les plus fréquents: {df_freq.head(n)}')
         print(f'Nombre de mots différents dans le corpus: {len(set_mots_uniques)}')
 
