@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from scipy.sparse import lil_matrix
+from tqdm import tqdm
 
 from Corpus.corpus import Corpus
 from utils.utils import nettoyer_texte
@@ -64,7 +65,11 @@ class SearchEngine:
         )
 
         # Pour chaque document
-        for num_doc, list_mots_document in self.dict_documents.items():
+        for num_doc, list_mots_document in tqdm(
+            self.dict_documents.items(),
+            desc = "Construction de la matrice TF",
+            unit = "document"
+        ):
 
             # Pour chaque mot du document
             for mot_document in list_mots_document:
@@ -177,7 +182,12 @@ class SearchEngine:
         list_cos = []
 
         # Pour chaque document
-        for num_row, vector_document in enumerate(self.matrix_tf_idf):
+        for num_row, vector_document in enumerate(tqdm(
+            self.matrix_tf_idf,
+            total = self.matrix_tf_idf.shape[0],
+            desc = "Recherche dans le corpus",
+            unit = "document"
+        )):
 
             # On calcule le produit scalaire entre la recherche et le document
             prod_scal_recherche_doc = float(
