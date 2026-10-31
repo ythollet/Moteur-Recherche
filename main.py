@@ -24,12 +24,23 @@ def main():
 
     corpus.load()
 
+    # On affiche les stats et récupère
+    # - le dictionnaire contenant pour chaque documents, sa liste de mots
+    # - le DataFrame contenant le nombre d'occurences de chaque mots dans le corpus
     dict_documents, df_freq = corpus.stats()
 
-    matrix_tf = corpus.build_matrix_tf(
+    # On récupère le dictionnaire contenant les infos de chaque mots
+    dict_mots = corpus.get_dict_mots_from_df_freq(
         in_df_freq = df_freq,
+    )
+
+    # On calcule la matrice TF
+    matrix_tf = corpus.build_matrix_tf(
+        in_dict_mots = dict_mots,
         in_dict_documents = dict_documents
     )
+
+    matrix_tf
 
 
 

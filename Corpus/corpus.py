@@ -400,16 +400,24 @@ class Corpus:
 
         return dict_documents, df_freq
 
+    @staticmethod
+    def get_dict_mots_from_df_freq(
+        in_df_freq: pd.DataFrame,
+    ) -> dict:
+
+        dict_mots = in_df_freq.to_dict(orient = 'index')
+        dict_mots = dict(sorted(dict_mots.items(), key = lambda x: x[0]))
+
+        return dict_mots
+
 
 
     def build_matrix_tf(
         self,
-        in_df_freq: pd.DataFrame,
+        in_dict_mots: dict,
         in_dict_documents: dict,
     ) -> lil_matrix[int, int]:
 
-        dict_mots = in_df_freq.to_dict(orient = 'index')
-        dict_mots = dict(sorted(dict_mots.items(), key = lambda x: x[0]))
 
         matrix_tf = lil_matrix((self.nb_docs, self.__nb_mots), dtype = int)
 
@@ -420,7 +428,7 @@ class Corpus:
             for mot_document in list_mots_document:
 
                 # On récupère l'id du mot
-                num_mot = dict_mots[mot_document]['id_mot']
+                num_mot = in_dict_mots[mot_document]['id_mot']
 
                 # On compte le nombre de fois que le mot apparait dans le doc
                 matrix_tf[num_doc, num_mot] += 1
