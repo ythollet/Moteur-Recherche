@@ -18,8 +18,7 @@ def main():
         in_corpus = corpus
     )
 
-    # texte = input("Saisissez votre recherche : ")
-    texte = "i like money"
+    texte = input("Saisissez votre recherche : ")
 
     search_engine.search(
         in_text = texte

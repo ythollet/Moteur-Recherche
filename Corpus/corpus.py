@@ -298,6 +298,7 @@ class Corpus:
             # On affiche le titre et le type
             print(f'{d.titre} - {d.get_type()}\n')
 
+
     def search(
         self,
         in_word: str
@@ -313,20 +314,32 @@ class Corpus:
         in_word: str,
         in_nb_char_context: int
     ) -> pd.DataFrame:
+        """
+        Retrouve un mot dans les documents et affiche aussi le contexte (mots
+        autour)
+
+        :param in_word: mot recherché
+        :param in_nb_char_context: nombre de caractères de contexte a affiché
+          autour du mot recherche
+        :return:
+        """
 
         # Si la variable contenant les documents est vide
         if not self.all_docs:
             raise ValueError('la variable self.all_docs est vide')
 
+        # Recherche du motif dans les documents
         res = re.findall(
-            rf'(.{{0,{in_nb_char_context}}})\s*\b({re.escape(in_word)})\b\s*'
+            rf'(.{{0,{in_nb_char_context}}})\s*\b'
+            rf'({re.escape(in_word)})\b\s*'
             rf'(.{{0,{in_nb_char_context}}})',
             self.all_docs
         )
 
+        # Convertit le résultat en DataFrame
         df = pd.DataFrame(
             res,
-            columns=['contexte_gauche', 'mot_recherche', 'contexte_droit']
+            columns = ['contexte_gauche', 'mot_recherche', 'contexte_droit']
         )
 
         return df
@@ -345,21 +358,31 @@ class Corpus:
           fréquents
         """
 
+        # Initialise le dictionnaire qui contiendra les infos sur les documents
         dict_documents = {}
+
+        # Initialise l'ensemble de mots uniques du corpus
         set_mots_uniques = set()
 
+        # Pour chaque document du corpus
         for d, document in self.documents.items():
 
+            # On nettoie le contenu du document
             texte = nettoyer_texte(document.texte)
 
+            # On split le contenu en mots
             list_mots = texte.split()
+
+            # On met à jour l'ensemble de mots du corpus
             set_mots_uniques |= set(list_mots)
 
+            # On renseigne la liste de mot pour le document courrant
             dict_documents[d] = list_mots
 
+        # On renseigne le nombre de mots du corpus
         self.nb_mots = len(set_mots_uniques)
 
-        # Une ligne par occurrence, avec l'identifiant de son document.
+        # Continent une ligne par couple (document, mot)
         df_mots = (
             pd.DataFrame(
                 dict_documents.items(),
@@ -369,6 +392,8 @@ class Corpus:
             .rename(columns={'list_mots': 'mot'})
         )
 
+        # Contient une ligne par mot, pour chaque mot on a son nombre total
+        # d'occurences et le nombre de documents dans lesquels il apparait
         df_freq = (
             df_mots
             .groupby('mot')
@@ -392,7 +417,11 @@ class Corpus:
         in_df_freq: pd.DataFrame,
     ) -> dict:
 
+        # Convertit en dictionnaire, le DataFrame contenant les fréquences
+        # d'apparition des mots
         dict_mots = in_df_freq.to_dict(orient = 'index')
+
+        # Trie le dictionnaire par ordre alphabétique des mots
         dict_mots = dict(sorted(dict_mots.items(), key = lambda x: x[0]))
 
         return dict_mots
