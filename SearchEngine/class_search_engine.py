@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from scipy.sparse import lil_matrix
-from tqdm import tqdm
+from tqdm.auto import tqdm
 
 from Corpus.corpus import Corpus
 from utils.utils import nettoyer_texte
