@@ -1,4 +1,5 @@
 from Documment.class_arxiv_document import ArxivDocument
+from Documment.class_document import Document
 from Documment.class_reddit_document import RedditDocument
 
 
@@ -7,7 +8,7 @@ class DocumentFactory:
     @staticmethod
     def create_document(
         in_row,
-    ):
+    ) -> Document:
 
         # On regarde le type de document
         match in_row.type:

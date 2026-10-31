@@ -1,11 +1,8 @@
 import ast
 import re
-import string
-from scipy.sparse import lil_matrix
 from pathlib import Path
 from typing import Optional
 
-import numpy as np
 import pandas as pd
 
 from API.load_reddit_arxiv import load_raw_data
@@ -15,10 +12,6 @@ from Documment.class_document import Document
 from Documment.class_document_factory import DocumentFactory
 from Documment.class_reddit_document import RedditDocument
 from utils.utils import nettoyer_texte
-
-pd.set_option("display.max_columns", None)
-pd.set_option("display.width", None)
-
 
 class Corpus:
     """ Regroupe des documents et leurs auteurs """
@@ -38,7 +31,7 @@ class Corpus:
     __all_docs: Optional[str] = None
     """ contient tous les documents concaténés en une seule chaine de caractère """
 
-    __nb_mots: Optional[int] = None
+    nb_mots: Optional[int] = None
 
     __nb_docs: Optional[int] = None
 
@@ -364,7 +357,7 @@ class Corpus:
 
             dict_documents[d] = list_mots
 
-        self.__nb_mots = len(set_mots_uniques)
+        self.nb_mots = len(set_mots_uniques)
 
         # Une ligne par occurrence, avec l'identifiant de son document.
         df_mots = (
@@ -390,7 +383,7 @@ class Corpus:
 
 
         print(f'Top {n} mots les plus fréquents: {df_freq.head(n)}')
-        print(f'Nombre de mots différents dans le corpus: {self.__nb_mots}')
+        print(f'Nombre de mots différents dans le corpus: {self.nb_mots}')
 
         return dict_documents, df_freq
 
@@ -406,141 +399,7 @@ class Corpus:
 
 
 
-    def build_matrix_tf(
-        self,
-        in_dict_mots: dict,
-        in_dict_documents: dict,
-    ) -> lil_matrix:
 
-
-        matrix_tf = lil_matrix((self.nb_docs, self.__nb_mots), dtype = float)
-
-        # Pour chaque document
-        for num_doc, list_mots_document in in_dict_documents.items():
-
-            # Pour chaque mot du document
-            for mot_document in list_mots_document:
-
-                # On récupère l'id du mot
-                num_mot = in_dict_mots[mot_document]['id_mot']
-
-                # On compte le nombre de fois que le mot apparait dans le doc
-                matrix_tf[num_doc, num_mot] += 1
-
-        return matrix_tf
-
-
-    def build_matrix_tf_idf(
-        self,
-        in_dict_mots: dict,
-        in_dict_documents: dict,
-    ) -> tuple[lil_matrix, np.ndarray]:
-
-
-        matrix_tf = self.build_matrix_tf(in_dict_mots, in_dict_documents)
-        idf_mots = np.zeros(len(in_dict_mots))
-
-        # On calcule l'IDF de chaque mot
-        for mot, stats_mot in in_dict_mots.items():
-            num_mot = stats_mot['id_mot']
-            idf_mot = np.log(self.nb_docs / stats_mot['nb_documents'])
-
-            # On stocke l'idf du mot dans une liste
-            idf_mots[num_mot] = idf_mot
-
-        matrix_tf_idf = matrix_tf.multiply(idf_mots).tolil()
-
-        return matrix_tf_idf, idf_mots
-
-
-
-    @staticmethod
-    def vectorize_texte(
-        in_text: str,
-        in_dict_mots: dict,
-        in_idf_mots: np.ndarray,
-    ) -> lil_matrix:
-
-        text = nettoyer_texte(in_str = in_text)
-        list_mots = text.split()
-
-        text_vectorized = np.zeros(len(in_dict_mots))
-        for mot in list_mots:
-
-            num_mot = in_dict_mots.get(mot, {}).get('id_mot', None)
-
-            if num_mot is not None:
-                text_vectorized[num_mot] += 1
-
-
-        text_vectorized_tf_idf = lil_matrix(text_vectorized * in_idf_mots)
-
-        return text_vectorized_tf_idf
-
-
-    def get_list_distances_recherche_documents(
-        self,
-        in_vector_recherche: lil_matrix,
-        in_matrix_tf_idf: lil_matrix,
-    ) -> list[float]:
-
-        # On calcule la norme du vecteur recherche
-        norme_vecteur_recherche = np.sqrt(
-            in_vector_recherche.multiply(in_vector_recherche).sum()
-        )
-
-        list_cos = []
-
-        # Pour chaque document
-        for num_row, vector_document in enumerate(in_matrix_tf_idf):
-
-            pass
-
-            # On calcule le produit scalaire entre la recherche et le document
-            prod_scal_recherche_doc = (
-                (vector_document @ in_vector_recherche.T)[0,0]
-            )
-
-            # On calucle la norme du vecteur document
-            norme_vecteur_document = np.sqrt(
-                vector_document.multiply(vector_document).sum()
-            )
-
-            # Calcule le cosinus entre le vecteur recherche et le vecteur document
-            cos_recherche_document = (
-                prod_scal_recherche_doc /
-                (norme_vecteur_recherche * norme_vecteur_document)
-                if norme_vecteur_recherche and norme_vecteur_document else 0
-            )
-
-            # Ajoute à la liste l'id du doc et son cos avec le vecteur recherche
-            list_cos.append(cos_recherche_document)
-
-        return list_cos
-
-
-    def show_best_results(
-        self,
-        in_list_cos: list[float]
-    ):
-
-        dict_documents = self.documents.copy()
-
-        df = pd.DataFrame.from_dict(
-            dict_documents,
-            orient = "index",
-            columns = ['titre', 'type', 'auteur'],
-        )
-
-
-
-        df['cos_recherche_document'] = in_list_cos
-
-        df = df.sort_values("cos_recherche_document", ascending = False)
-
-        print(df.head())
-
-        pass
 
 
 
@@ -575,8 +434,6 @@ if __name__ == "__main__":
 
     corpus = Corpus(
         nom = "test",
-        authors = {},
-        documents = documents,
     )
 
     # Résultat attendu : documents 2, 3 (les deux plus récents).
@@ -594,8 +451,6 @@ if __name__ == "__main__":
     # Un nouveau corpus vide permet de vérifier que load restaure les données.
     corpus_charge = Corpus(
         nom = "test",
-        authors = {},
-        documents = {},
     )
     corpus_charge.load()
 
