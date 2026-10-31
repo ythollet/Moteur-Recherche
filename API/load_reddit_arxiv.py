@@ -4,14 +4,14 @@ from API.arxiv import Arxiv
 from API.reddit import Reddit
 
 
-def load_raw_data(self) -> pd.DataFrame:
+def load_raw_data() -> pd.DataFrame:
     """Charge et regroupe les documents provenant de Reddit et d'Arxiv
 
     Return: pd.DataFrame: Documents des deux sources
     """
 
     # On charge les données Reddit dans un DataFrame
-    df_reddit = Reddit._load_data_reddit()
+    df_reddit = Reddit.load_data_reddit()
 
     # On charge les données Arxiv dans un DataFrame
     df_arxiv = Arxiv.load_data_arxiv()
@@ -44,6 +44,9 @@ def load_raw_data(self) -> pd.DataFrame:
             list_id_row_to_drop.append(row.id)
 
     # Les id correspondent à l'index : supprime les textes manquants ou trop courts.
-    df.drop(index = list_id_row_to_drop, inplace = True)
+    df = df.drop(index = list_id_row_to_drop).reset_index(drop=True)
+
+    # Réinitialise l'index après le filtrage, puis attribue des id consécutifs.
+    df['id'] = df.index
 
     return df

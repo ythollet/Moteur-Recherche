@@ -24,8 +24,12 @@ def main():
 
     corpus.load()
 
-    corpus.stats()
+    dict_documents, df_freq = corpus.stats()
 
+    matrix_tf = corpus.build_matrix_tf(
+        in_df_freq = df_freq,
+        in_dict_documents = dict_documents
+    )
 
 
 

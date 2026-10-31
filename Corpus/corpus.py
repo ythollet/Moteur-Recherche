@@ -1,10 +1,11 @@
 import ast
 import re
 import string
-from collections import Counter
+from scipy.sparse import lil_matrix
 from pathlib import Path
 from typing import Optional
 
+import numpy as np
 import pandas as pd
 
 from API.load_reddit_arxiv import load_raw_data
@@ -33,6 +34,8 @@ class Corpus:
     __all_docs: Optional[str] = None
     """ contient tous les documents concaténés en une seule chaine de caractère """
 
+    __nb_mots: Optional[int] = None
+
     __nb_docs: Optional[int] = None
 
     _instance = None
@@ -52,13 +55,14 @@ class Corpus:
 
         return self.__all_docs
 
+
     @property
     def nb_docs(self):
 
         if self.__nb_docs is None:
             self.__nb_docs = len(self.documents)
-        else:
-            return self.nb_docs
+
+        return self.__nb_docs
 
 
     def __init__(
@@ -344,7 +348,7 @@ class Corpus:
     def stats(
         self,
         n: int = 10
-    ):
+    ) -> tuple[dict, pd.DataFrame]:
         """
         Affiche:
         - le nombre de mots différents dans le corpus
@@ -354,7 +358,7 @@ class Corpus:
           fréquents
         """
 
-        dict_vocabulaire = {}
+        dict_documents = {}
         set_mots_uniques = set()
 
         for d, document in self.documents.items():
@@ -364,12 +368,14 @@ class Corpus:
             list_mots = texte.split()
             set_mots_uniques |= set(list_mots)
 
-            dict_vocabulaire[d] = list_mots
+            dict_documents[d] = list_mots
+
+        self.__nb_mots = len(set_mots_uniques)
 
         # Une ligne par occurrence, avec l'identifiant de son document.
         df_mots = (
             pd.DataFrame(
-                dict_vocabulaire.items(),
+                dict_documents.items(),
                 columns = ['id_document', 'list_mots']
             )
             .explode('list_mots', ignore_index=True)
@@ -388,18 +394,38 @@ class Corpus:
 
         df_freq['id_mot'] = range(0, len(df_freq))
 
-        dict_vocab = df_freq.to_dict(orient='index')
-        dict_vocab = dict(sorted(dict_vocab.items(), key = lambda x: x[0]))
-
-        pass
 
         print(f'Top {n} mots les plus fréquents: {df_freq.head(n)}')
-        print(f'Nombre de mots différents dans le corpus: {len(set_mots_uniques)}')
+        print(f'Nombre de mots différents dans le corpus: {self.__nb_mots}')
+
+        return dict_documents, df_freq
 
 
 
+    def build_matrix_tf(
+        self,
+        in_df_freq: pd.DataFrame,
+        in_dict_documents: dict,
+    ) -> lil_matrix[int, int]:
 
+        dict_mots = in_df_freq.to_dict(orient = 'index')
+        dict_mots = dict(sorted(dict_mots.items(), key = lambda x: x[0]))
 
+        matrix_tf = lil_matrix((self.nb_docs, self.__nb_mots), dtype = int)
+
+        # Pour chaque document
+        for num_doc, list_mots_document in in_dict_documents.items():
+
+            # Pour chaque mot du document
+            for mot_document in list_mots_document:
+
+                # On récupère l'id du mot
+                num_mot = dict_mots[mot_document]['id_mot']
+
+                # On compte le nombre de fois que le mot apparait dans le doc
+                matrix_tf[num_doc, num_mot] += 1
+
+        return matrix_tf
 
 if __name__ == "__main__":
 

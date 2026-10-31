@@ -55,7 +55,7 @@ class Reddit:
 
 
     @staticmethod
-    def _load_data_reddit() -> pd.DataFrame:
+    def load_data_reddit() -> pd.DataFrame:
         """
         Charge le CSV Reddit si dispo en local, sinon effectue un appel API
         pour récupérer les données.
