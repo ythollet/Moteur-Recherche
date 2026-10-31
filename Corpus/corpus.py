@@ -416,10 +416,10 @@ class Corpus:
         self,
         in_dict_mots: dict,
         in_dict_documents: dict,
-    ) -> lil_matrix[int, int]:
+    ) -> lil_matrix:
 
 
-        matrix_tf = lil_matrix((self.nb_docs, self.__nb_mots), dtype = int)
+        matrix_tf = lil_matrix((self.nb_docs, self.__nb_mots), dtype = float)
 
         # Pour chaque document
         for num_doc, list_mots_document in in_dict_documents.items():
@@ -432,6 +432,26 @@ class Corpus:
 
                 # On compte le nombre de fois que le mot apparait dans le doc
                 matrix_tf[num_doc, num_mot] += 1
+
+        return matrix_tf
+
+
+    def build_matrix_tf_idf(
+        self,
+        in_dict_mots: dict,
+        in_dict_documents: dict,
+    ) -> lil_matrix:
+
+
+        matrix_tf = self.build_matrix_tf(in_dict_mots, in_dict_documents)
+
+        # On calcule l'IDF de chaque mot
+        for mot, stats_mot in in_dict_mots.items():
+            num_mot = stats_mot['id_mot']
+            idf_mot = np.log(self.nb_docs / stats_mot['nb_documents'])
+
+            matrix_tf[:, num_mot] *= idf_mot
+
 
         return matrix_tf
 

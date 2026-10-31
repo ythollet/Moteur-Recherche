@@ -34,8 +34,9 @@ def main():
         in_df_freq = df_freq,
     )
 
-    # On calcule la matrice TF
-    matrix_tf = corpus.build_matrix_tf(
+
+    # On calucle la matrice TF-IDF
+    matrix_tf_idf = corpus.build_matrix_tf_idf(
         in_dict_mots = dict_mots,
         in_dict_documents = dict_documents
     )
