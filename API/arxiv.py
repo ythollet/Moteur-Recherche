@@ -33,7 +33,7 @@ class Arxiv:
             f"https://export.arxiv.org/api/query?"
             f"search_query={query}"
             f"&start=0"
-            f"&max_results=10"
+            f"&max_results=1000"
         )
 
         # On crée la requête

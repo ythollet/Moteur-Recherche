@@ -1,0 +1,11 @@
+services:
+  moteur-recherche:
+    build: .
+    ports:
+      - "127.0.0.1:8888:8888"
+
+  streamlit:
+    build: .
+    ports:
+      - "127.0.0.1:8501:8501"
+    command: ["/app/.venv/bin/streamlit", "run", "app.py", "--server.address=0.0.0.0", "--server.port=8501", "--server.headless=true"]

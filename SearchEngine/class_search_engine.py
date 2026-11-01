@@ -113,8 +113,20 @@ class SearchEngine:
     def search(
         self,
         in_text: str,
-        in_nb_docs_to_return = 5
+        in_nb_docs_to_return = 5,
+        in_source: str | None = None
     ) -> pd.DataFrame:
+
+        """Recherche les meilleurs documents, avec un filtre facultatif.
+
+        :param in_text: Mots-clés de la requête.
+        :param in_nb_docs_to_return: Nombre maximal de documents à retourner.
+        :param in_source: Source retenue, ou None pour toutes les sources.
+        :return: Tableau des documents classés par similarité.
+        :raises ValueError: Si la source est inconnue.
+        """
+        if in_source not in (None, "Reddit", "Arxiv"):
+            raise ValueError("Source inconnue : choisissez Reddit ou Arxiv.")
 
         # On convertit le texte en vecteur
         text_vectorized = self.vectorize_texte(
@@ -130,7 +142,8 @@ class SearchEngine:
         # On détermine les documents qui correspondent le mieux à la recherche
         df_best_docs = self.show_best_results(
             in_list_cos = list_cos,
-            in_nb_docs_to_return = in_nb_docs_to_return
+            in_nb_docs_to_return = in_nb_docs_to_return,
+            in_source = in_source
         )
 
         return df_best_docs
@@ -212,10 +225,62 @@ class SearchEngine:
         return list_cos
 
 
+    def get_top_mots(
+        self,
+        in_nb_mots: int = 15,
+        in_source: str | None = None
+    ) -> pd.DataFrame:
+        """Classe les mots par score TF-IDF moyen dans les documents retenus.
+
+        :param in_nb_mots: Nombre maximal de mots à retourner.
+        :param in_source: Source retenue, ou None pour tout le corpus.
+        :return: Tableau des mots et de leur score TF-IDF moyen décroissant.
+        :raises ValueError: Si le nombre de mots ou la source est invalide.
+        """
+        if in_nb_mots < 1:
+            raise ValueError("Le nombre de mots doit être positif.")
+        if in_source not in (None, "Reddit", "Arxiv"):
+            raise ValueError("Source inconnue : choisissez Reddit ou Arxiv.")
+
+        # Les identifiants des documents correspondent aux lignes de la matrice.
+        lignes = [
+            id_doc for id_doc, document in self.corpus.documents.items()
+            if in_source is None or document.type == in_source
+        ]
+        if not lignes:
+            return pd.DataFrame(columns = ["mot", "score_tf_idf"])
+
+        # On conserve la matrice creuse : seul le vecteur moyen devient dense.
+        scores = np.asarray(
+            self.matrix_tf_idf.tocsr()[lignes].mean(axis = 0)
+        ).ravel()
+
+        df_mots = pd.DataFrame(
+            [
+                {"mot": mot, "score_tf_idf": scores[stats["id_mot"]]}
+                for mot, stats in self.dict_mots.items()
+            ],
+            columns = ["mot", "score_tf_idf"],
+        )
+
+        # On écarte les scores nuls et les fragments de moins de trois lettres.
+        df_mots = df_mots.loc[
+            (df_mots["score_tf_idf"] > 0) & (df_mots["mot"].str.len() >= 3)
+        ]
+        return (
+            df_mots.sort_values(
+                ["score_tf_idf", "mot"], ascending = [False, True]
+            )
+            .head(in_nb_mots)
+            .reset_index(drop = True)
+        )
+
+
     def show_best_results(
         self,
         in_list_cos: list[float],
-        in_nb_docs_to_return: int
+        in_nb_docs_to_return: int,
+        in_source: str | None = None
     ) -> pd.DataFrame:
 
         # On stocke les documents dans un Dictionnaire
@@ -225,15 +290,21 @@ class SearchEngine:
         df = pd.DataFrame.from_dict(
             dict_documents,
             orient = "index",
-            columns = ['titre', 'type', 'auteur'],
+            columns = ['titre', 'url', 'type', 'auteur'],
         )
 
         # Ajout de la mesure de distance entre recherche et documents
         df['cos_recherche_document'] = in_list_cos
 
+        # Filtre avant de limiter le nombre de résultats.
+        if in_source is not None:
+            df = df.loc[df['type'] == in_source]
+
         # On trie le DataFrame selon la mesure et conserve uniquement un top
         df = (
-            df.sort_values("cos_recherche_document", ascending = False)
+            df.sort_values(
+                "cos_recherche_document", ascending = False, kind = "stable"
+            )
             .head(in_nb_docs_to_return)
         )
 

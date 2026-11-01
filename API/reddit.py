@@ -26,7 +26,7 @@ class Reddit:
         subr = reddit.subreddit("personalfinance")
 
         # On récupère les posts
-        posts = list(subr.hot(limit = 10))
+        posts = list(subr.hot(limit = None))
 
         # On stocke les posts sous forme de RedditDocument, dans une liste
         documents_reddit = [

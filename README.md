@@ -1,1 +1,48 @@
 # Moteur-Recherche
+
+## Interface web Streamlit (bonus 2)
+
+Depuis la racine du projet, avec Python 3.13 et uv :
+
+```shell
+uv sync --locked
+uv run streamlit run app.py
+```
+
+Ouvrir http://localhost:8501, saisir des mots-clés, choisir le nombre de
+résultats et éventuellement la source, puis cliquer sur **Rechercher**.
+Le tableau reprend le classement TF-IDF du moteur existant.
+
+L'application utilise `CorpusData/corpus_finance.csv` sans interroger les API.
+Si ce fichier manque, un message d'erreur est affiché. Le moteur est conservé
+en cache entre les interactions ; après modification du corpus, redémarrer
+l'application pour reconstruire le moteur.
+
+### Visualisation du vocabulaire (bonus 7)
+
+Sous les résultats, un diagramme en barres interactif affiche les mots les plus
+importants du corpus, avec un curseur de 5 à 30 mots. Le filtre Source s'applique
+aussi au graphique. Le score est la moyenne des poids TF-IDF sur les documents
+de la source choisie, en conservant l'IDF du corpus complet. Les scores nuls
+et les mots de moins de trois caractères sont exclus. Le graphique porte sur
+le corpus sélectionné, indépendamment de la requête et du nombre de résultats.
+
+### Avec Docker Compose
+
+Pour construire et démarrer uniquement Streamlit :
+
+```shell
+docker compose up -d --build streamlit
+```
+
+Ouvrir http://localhost:8501. Pour consulter les journaux ou arrêter ce service :
+
+```shell
+docker compose logs streamlit
+docker compose stop streamlit
+```
+
+Le service `moteur-recherche` conserve l'interface Jupyter sur le port 8888.
+`docker compose up -d --build` démarre les deux interfaces.
+Les fichiers sont copiés dans les images : pour prendre en compte une
+modification du code ou du corpus, reconstruire avec `--build`.
