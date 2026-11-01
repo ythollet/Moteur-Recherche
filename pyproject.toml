@@ -3,25 +3,23 @@ name = "moteurrecherche"
 version = "0.1.0"
 requires-python = ">=3.13"
 dependencies = [
-    "arxiv>=4.0.1",
     "ipykernel>=7.4.0",
+    "ipython>=9.18.0",
     "ipywidgets>=8.1.9",
     "jupyterlab>=4.6.5",
-    "numpy>=2.5.3",
-    "pandas>=3.0.5",
-    "pandas-stubs~=3.0.5",
-    "pdfplumber>=0.11.10",
+    "numpy>=2.5.4",
+    "pandas>=3.1.0",
     "praw>=8.0.3",
-    "python-dotenv>=1.2.3",
+    "python-dotenv>=1.2.4",
     "scipy>=1.18.1",
-    "scipy-stubs~=1.18.1",
     "streamlit>=1.66.1",
     "tqdm>=4.70.1",
-    "xmldict>=0.4.1",
     "xmltodict>=1.0.4",
 ]
 
 [dependency-groups]
 dev = [
     "black>=26.5.1",
+    "pandas-stubs~=3.1.0.261029",
+    "scipy-stubs~=1.18.1",
 ]

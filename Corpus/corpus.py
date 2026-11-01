@@ -38,6 +38,19 @@ class Corpus:
     _instance = None
     """ Instance unique du corpus """
 
+    def __repr__(self) -> str:
+        """Renvoie le nom et l'état de chargement du corpus.
+
+        :return: Représentation courte du corpus.
+        """
+        if not hasattr(self, "documents"):
+            return f"Corpus(nom={self.nom!r}, non chargé)"
+
+        return (
+            f"Corpus(nom={self.nom!r}, "
+            f"documents={len(self.documents)}, auteurs={len(self.authors)})"
+        )
+
     @property
     def all_docs(self) -> str:
 
@@ -425,80 +438,3 @@ class Corpus:
         dict_mots = dict(sorted(dict_mots.items(), key = lambda x: x[0]))
 
         return dict_mots
-
-
-
-
-
-
-
-
-
-if __name__ == "__main__":
-
-
-
-    from datetime import datetime
-
-    # Exemple indépendant des API, avec des documents Reddit et Arxiv.
-    documents = {
-        1: RedditDocument(
-            titre = "titre1", date = datetime(2026, 10, 1),
-            url = "https://example.org/python",
-            texte = "Un document sur Python.",
-            type = "Reddit", nb_comments = 5, auteur = "Alice",
-        ),
-        2: ArxivDocument(
-            titre = "titre2", date = datetime(2026, 10, 3),
-            url = "https://example.org/arxiv", texte = "Un document sur Arxiv.",
-            type = "Arxiv", list_auteurs = ["Alice", "Bob"],
-        ),
-        3: RedditDocument(
-            titre = "titre3", date = datetime(2026, 10, 2),
-            url = "https://example.org/reddit",
-            texte = "Un document sur Reddit.",
-            type = "Reddit", nb_comments = 3, auteur = "Bob",
-        ),
-    }
-
-    corpus = Corpus(
-        nom = "test",
-    )
-
-    # Résultat attendu : documents 2, 3 (les deux plus récents).
-    print("Tri par date :")
-    corpus.show_docs_order_by_date(2)
-
-    # Résultat attendu : documents 1, 2 (les deux premiers titres triés).
-    print("\nTri par titre :")
-    corpus.show_docs_order_by_title(2)
-
-    print("\nSauvegarde du corpus :")
-    corpus.save()
-    print(f"Fichier créé : CorpusData/{corpus.nom}.csv")
-
-    # Un nouveau corpus vide permet de vérifier que load restaure les données.
-    corpus_charge = Corpus(
-        nom = "test",
-    )
-    corpus_charge.load()
-
-    assert corpus_charge is corpus
-    assert corpus_charge.documents is documents
-    assert corpus_charge.documents == corpus.documents
-    assert corpus_charge.id_document == len(documents)
-    assert set(corpus_charge.authors) == {"Alice", "Bob"}
-    assert corpus_charge.authors["Alice"].productions == {
-        1: documents[1], 2: documents[2]
-    }
-    assert corpus_charge.authors["Bob"].productions == {
-        2: documents[2], 3: documents[3]
-    }
-    assert all(
-        auteur.nb_docs() == 2 for auteur in corpus_charge.authors.values()
-        )
-    print(
-        "Chargement réussi : les 3 documents et les 2 auteurs ont été restaurés."
-        )
-
-    corpus_charge.show_articles()

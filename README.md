@@ -1,5 +1,20 @@
 # Moteur-Recherche
 
+## Tests de Corpus
+
+Depuis la racine du projet, après installation des dépendances :
+
+```shell
+uv run python -m unittest discover -s tests -v
+```
+
+Les tests utilisent `unittest`, inclus dans Python, et trois documents fictifs.
+Ils vérifient le Singleton, les tris et leur limite, la reconstruction des auteurs,
+la sauvegarde puis le rechargement, une recherche sans correspondance et les
+fréquences des mots. La sauvegarde se fait dans un dossier temporaire, sans
+modifier le corpus réel ni interroger les API. Les tests via l'interface restent
+à effectuer séparément.
+
 ## Interface web Streamlit (bonus 2)
 
 Depuis la racine du projet, avec Python 3.13 et uv :
@@ -7,6 +22,15 @@ Depuis la racine du projet, avec Python 3.13 et uv :
 ```shell
 uv sync --locked
 uv run streamlit run app.py
+```
+
+`pyproject.toml` déclare les dépendances et `uv.lock` fixe leurs versions.
+`requirements.txt` est un export des dépendances d'exécution pour une
+installation avec `pip install -r requirements.txt`. Après une modification
+des dépendances et la mise à jour de `uv.lock`, le régénérer avec :
+
+```shell
+uv export --frozen --no-dev --no-emit-project --output-file requirements.txt
 ```
 
 Ouvrir http://localhost:8501, saisir des mots-clés, choisir le nombre de
