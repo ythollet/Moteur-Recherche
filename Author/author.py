@@ -78,7 +78,7 @@ class Author:
         )
 
         # Calucle la taille moyenne des documents
-        taille_moyenne_docs = taille_totale_docs / author.nb_docs()
+        taille_moyenne_docs = taille_totale_docs / author.nb_docs
 
         # Affiche les statistiques
         print(

@@ -219,7 +219,7 @@ class Corpus:
             self.id_document = len(df)
             self.authors = {}
             self._load_helper_document(in_df = df)
-            self._load_helper_list_auteurs()
+            self.load_helper_list_auteurs()
 
 
         # Si le corpus n'est pas présent en local
@@ -232,7 +232,7 @@ class Corpus:
             self.id_document = len(df)
             self.authors = {}
             self._load_helper_document(in_df = df)
-            self._load_helper_list_auteurs()
+            self.load_helper_list_auteurs()
 
             self.save()
 
@@ -263,7 +263,7 @@ class Corpus:
             self.documents |= {row.id: document}
 
 
-    def _load_helper_list_auteurs(
+    def load_helper_list_auteurs(
         self,
     ):
         """ Initialise l'attribut `list_auteurs` à partir d'un DataFrame de

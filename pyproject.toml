@@ -21,5 +21,6 @@ dependencies = [
 dev = [
     "black>=26.5.1",
     "pandas-stubs~=3.1.0.261029",
+    "pytest>=9.2.0",
     "scipy-stubs~=1.18.1",
 ]

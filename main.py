@@ -18,11 +18,11 @@ def main():
         in_corpus = corpus
     )
 
-    texte = input("Saisissez votre recherche : ")
-
-    search_engine.search(
-        in_text = texte
-    )
+    # texte = input("Saisissez votre recherche : ")
+    #
+    # search_engine.search(
+    #     in_text = texte
+    # )
 
 
 

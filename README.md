@@ -1,19 +1,26 @@
 # Moteur-Recherche
 
-## Tests de Corpus
+## Tests de Corpus et du moteur
 
-Depuis la racine du projet, après installation des dépendances :
+Depuis la racine du projet, installer les dépendances de développement puis lancer :
 
 ```shell
-uv run python -m unittest discover -s tests -v
+uv sync --locked
+uv run python -m pytest -v
 ```
 
-Les tests utilisent `unittest`, inclus dans Python, et trois documents fictifs.
+Les tests utilisent `pytest` (dépendance de développement) et trois documents fictifs.
 Ils vérifient le Singleton, les tris et leur limite, la reconstruction des auteurs,
 la sauvegarde puis le rechargement, une recherche sans correspondance et les
 fréquences des mots. La sauvegarde se fait dans un dossier temporaire, sans
 modifier le corpus réel ni interroger les API. Les tests via l'interface restent
 à effectuer séparément.
+
+Les tests du moteur vérifient les matrices TF et TF-IDF, la normalisation de la
+requête, les scores cosinus, le classement, le nombre de résultats, les filtres
+par source et les mots affichés dans le graphique. Les requêtes sans mot connu
+sont aussi testées : le moteur conserve actuellement les documents avec un
+score nul. La fixture commune aux tests est définie dans `tests/conftest.py`.
 
 ## Interface web Streamlit (bonus 2)
 
