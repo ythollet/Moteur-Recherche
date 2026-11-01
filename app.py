@@ -82,6 +82,7 @@ if "derniere_recherche" in st.session_state:
             resultats,
             width = "stretch",
             column_config = {
+                "auteurs": "Auteurs",
                 "url": st.column_config.LinkColumn(
                     "lien", display_text = "Ouvrir l’article"
                 )

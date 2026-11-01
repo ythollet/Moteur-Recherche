@@ -285,14 +285,23 @@ class SearchEngine:
         in_source: str | None = None
     ) -> pd.DataFrame:
 
-        # On stocke les documents dans un Dictionnaire
-        dict_documents = self.corpus.documents.copy()
-
-        # On convertit les documents en DataFrame
+        # Une même colonne affiche l'auteur Reddit ou tous les coauteurs Arxiv.
         df = pd.DataFrame.from_dict(
-            dict_documents,
+            {
+                id_doc: {
+                    'titre': document.titre,
+                    'url': document.url,
+                    'type': document.type,
+                    'auteurs': (
+                        ', '.join(document.list_auteurs)
+                        if document.type == 'Arxiv'
+                        else document.auteur
+                    ),
+                }
+                for id_doc, document in self.corpus.documents.items()
+            },
             orient = "index",
-            columns = ['titre', 'url', 'type', 'auteur'],
+            columns = ['titre', 'url', 'type', 'auteurs'],
         )
 
         # Ajout de la mesure de distance entre recherche et documents

@@ -54,7 +54,10 @@ def test_classement_et_format_resultats(moteur):
     assert list(resultats.index) == [0, 1, 2]
     assert list(resultats["titre"]) == ["Alpha", "Gamma", "Beta"]
     assert resultats["cos_recherche_document"].is_monotonic_decreasing
-    assert {"titre", "url", "type", "auteur", "cos_recherche_document"} <= set(resultats.columns)
+    assert {"titre", "url", "type", "auteurs", "cos_recherche_document"} <= set(resultats.columns)
+    assert resultats.loc[0, "auteurs"] == "Alice"
+    assert resultats.loc[1, "auteurs"] == "Alice, Bob"
+    assert resultats.loc[2, "auteurs"] == "Bob"
 
 
 @pytest.mark.parametrize("nombre, attendu", [(0, 0), (1, 1), (2, 2), (10, 3)])
