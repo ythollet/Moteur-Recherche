@@ -263,9 +263,11 @@ class SearchEngine:
             columns = ["mot", "score_tf_idf"],
         )
 
-        # On écarte les scores nuls et les fragments de moins de trois lettres.
+        # On écarte les scores nuls, les mots courts et ceux avec une apostrophe.
         df_mots = df_mots.loc[
-            (df_mots["score_tf_idf"] > 0) & (df_mots["mot"].str.len() >= 3)
+            (df_mots["score_tf_idf"] > 0)
+            & (df_mots["mot"].str.len() >= 3)
+            & ~df_mots["mot"].str.contains("['’‘ʼ]", regex = True, na = False)
         ]
         return (
             df_mots.sort_values(

@@ -83,7 +83,7 @@ if "derniere_recherche" in st.session_state:
             width = "stretch",
             column_config = {
                 "url": st.column_config.LinkColumn(
-                    "Lien", display_text = "Ouvrir l’article"
+                    "lien", display_text = "Ouvrir l’article"
                 )
             },
         )
@@ -94,7 +94,8 @@ st.subheader("Mots les plus importants du corpus")
 st.caption(
     f"Source : {source}. Score TF-IDF moyen sur les documents de cette source, "
     "avec l’IDF du corpus complet. Ce graphique est indépendant de la requête. "
-    "Les mots de moins de trois caractères et les scores nuls sont exclus."
+    "Les mots de moins de trois caractères, ceux contenant une apostrophe "
+    "et les scores nuls sont exclus."
 )
 nombre_mots = st.slider("Nombre de mots à afficher", min_value = 5, max_value = 30, value = 15)
 top_mots = moteur.get_top_mots(
