@@ -3,6 +3,8 @@ import html
 import pandas as pd
 import praw
 import os
+from datetime import datetime, timezone
+from pathlib import Path
 
 from Documment.class_reddit_document import RedditDocument
 
@@ -13,7 +15,11 @@ class Reddit:
     def main_fetch_data():
         """
         Récupère les posts Reddit et les sauvegarde en CSV sur le disque.
+
+        :raises ValueError: Si aucun texte exploitable n'est récupéré.
         """
+
+        subreddits = ("personalfinance", "financialindependence", "Bogleheads")
 
         # Récupération de textes depuis Reddit
         reddit = praw.Reddit(
@@ -22,11 +28,16 @@ class Reddit:
             user_agent = os.getenv("USER_AGENT"),
         )
 
-        # Choix du subreddit
-        subr = reddit.subreddit("personalfinance")
-
-        # On récupère les posts
-        posts = list(subr.hot(limit = None))
+        # Récupère les publications populaires de chaque communauté.
+        posts = []
+        for nom_subreddit in subreddits:
+            subr = reddit.subreddit(nom_subreddit)
+            for post in subr.hot(limit = None):
+                texte = Reddit._clean_str(in_str = post.selftext)
+                # Même seuil que le corpus : écarte aussi les textes supprimés.
+                if len(texte) < 100:
+                    continue
+                posts.append(post)
 
         # On stocke les posts sous forme de RedditDocument, dans une liste
         documents_reddit = [
@@ -39,7 +50,7 @@ class Reddit:
                 ),
                 url = post.url,
                 date = post.created_datetime,
-                auteur = post.author.name,
+                auteur = post.author.name if post.author is not None else "",
                 type = 'Reddit',
                 nb_comments = post.num_comments,
             )
@@ -47,11 +58,17 @@ class Reddit:
             in posts
         ]
 
+        # Une collecte vide ne doit pas écraser les données déjà disponibles.
+        if not documents_reddit:
+            raise ValueError("Aucun texte Reddit exploitable n'a été récupéré.")
+
         # Conversion du texte Reddit en DataFrame
         df_reddit = pd.DataFrame(documents_reddit)
 
         # On sauvegarde les données en CSV sur le disque
+        Path("RawData").mkdir(exist_ok = True)
         df_reddit.to_csv("RawData/reddit.csv", index = False, sep = "\t")
+        print(f"Nombre de publications Reddit retenues : {len(df_reddit)}")
 
 
     @staticmethod

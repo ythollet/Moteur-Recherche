@@ -22,6 +22,57 @@ par source et les mots affichés dans le graphique. Les requêtes sans mot connu
 sont aussi testées : le moteur conserve actuellement les documents avec un
 score nul. La fixture commune aux tests est définie dans `tests/conftest.py`.
 
+## Collecte Reddit
+
+La collecte combine les communautés `personalfinance`, `financialindependence`
+et `Bogleheads`. Pour chacune, elle récupère les publications populaires avec
+`hot(limit=None)`, dans les limites imposées par Reddit. Les textes de moins
+de 100 caractères sont exclus. Les publications sont regroupées dans une liste ;
+les republications ne sont pas dédoublonnées.
+
+Pour renouveler les données brutes depuis un notebook lancé à la racine :
+
+```python
+from dotenv import load_dotenv
+from API.reddit import Reddit
+
+load_dotenv()
+Reddit.main_fetch_data()
+```
+
+Cette opération utilise les accès Reddit du fichier `.env` et remplace
+`RawData/reddit.csv` après une collecte réussie et non vide. Sauvegarder ce
+fichier avant la collecte pour conserver l'ancienne version.
+La variable locale `subreddits`, dans `main_fetch_data`, permet de choisir
+les communautés à parcourir.
+
+Le corpus final `CorpusData/corpus_finance.csv` n'est pas actualisé automatiquement.
+Pour le reconstruire, conserver une copie de l'ancien fichier sous un autre nom,
+puis appeler `Corpus("corpus_finance").load()` dans une nouvelle session Python.
+Le chargement reconstruira le corpus depuis les données brutes et le sauvegardera.
+Redémarrer ensuite l'application pour reconstruire son moteur en cache.
+
+## Collecte Arxiv
+
+La requête combine onze expressions sur les finances personnelles, les
+investisseurs particuliers, la culture financière, la retraite, l'endettement,
+l'emprunt immobilier et le choix de portefeuille. Les expressions sont reliées
+par `OR` : un article peut correspondre à l'une d'elles. La collecte demande
+jusqu'à 1 000 articles, classés par pertinence ; seuls les résumés sont indexés.
+
+Pour renouveler les données brutes depuis un notebook lancé à la racine :
+
+```python
+from API.arxiv import Arxiv
+
+Arxiv.fetch_data()
+```
+
+Sauvegarder `RawData/arxiv.csv` avant cet appel, qui le remplace si des articles
+sont trouvés. Reconstruire ensuite le corpus final et redémarrer l'application,
+comme indiqué pour Reddit. Élargir la requête peut aussi introduire des articles
+moins proches des questions pratiques : contrôler les résultats après collecte.
+
 ## Interface web Streamlit (bonus 2)
 
 Depuis la racine du projet, avec Python 3.13 et uv :

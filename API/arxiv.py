@@ -1,6 +1,8 @@
 import ast
 import os
-import urllib
+import urllib.parse
+import urllib.request
+from pathlib import Path
 from typing import Any
 import xmltodict
 import pandas as pd
@@ -16,25 +18,36 @@ class Arxiv:
         """
         Récupère les articles, initialise des objets ArxivDocument, convertit en
         DataFrame et les sauvegarde en CSV sur le disque
+
+        :raises ValueError: Si aucun article n'est trouvé.
         """
 
-        # Les expressions sont encodées pour l'URL et reliées par un OU logique.
+        # Expressions liées aux finances des particuliers.
+        expressions = (
+            "personal finance", "retail investor", "individual investor",
+            "household finance", "financial literacy", "retirement saving",
+            "retirement planning", "consumer debt", "household debt",
+            "mortgage borrowing", "portfolio choice",
+        )
+
+        # Relie les expressions par un OU logique.
         # Le préfixe all recherche dans l'ensemble des champs de l'article
         # (titre, résumé, auteur).
-        query = (
-            'all:%22personal%20finance%22%20OR%20'
-            'all:%22retail%20investor%22%20OR%20'
-            'all:%22individual%20investor%22%20OR%20'
-            'all:%22household%20finance%22'
+        query = ' OR '.join(
+            f'all:"{expression}"'
+                for expression in expressions
         )
 
         # On construit l'URL
-        url = (
-            f"https://export.arxiv.org/api/query?"
-            f"search_query={query}"
-            f"&start=0"
-            f"&max_results=1000"
-        )
+        # urlencode encode les espaces et les guillemets pour construire l'URL.
+        parametres = urllib.parse.urlencode({
+            "search_query": query,
+            "start": 0,
+            "max_results": 1000,
+            "sortBy": "relevance",
+            "sortOrder": "descending",
+        })
+        url = f"https://export.arxiv.org/api/query?{parametres}"
 
         # On crée la requête
         req = urllib.request.Request(
@@ -55,11 +68,14 @@ class Arxiv:
 
         # xmltodict renvoie un dictionnaire pour une entrée unique : on
         # convertit en liste pour consevrer le même format
-        articles = dict_arxiv["feed"]["entry"]
+        articles = dict_arxiv["feed"].get("entry", [])
         if isinstance(articles, dict):
             articles = [articles]
 
         print("Nombre d'articles Arxiv trouvés :", len(articles))
+
+        if not articles:
+            raise ValueError("Aucun article Arxiv trouvé ; le CSV est conservé.")
 
         # On stocke les documents dans une liste
         documents_arxiv = []
@@ -84,6 +100,7 @@ class Arxiv:
         df_arxiv = pd.DataFrame(documents_arxiv)
 
         # On exporte le DataFrame en CSV
+        Path("RawData").mkdir(exist_ok = True)
         df_arxiv.to_csv("RawData/arxiv.csv", index = False, sep = "\t")
 
     @staticmethod
