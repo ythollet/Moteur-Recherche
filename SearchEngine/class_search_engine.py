@@ -24,6 +24,10 @@ class SearchEngine:
     idf_mots: np.ndarray
     """ Contient les coefficients IDF de chaque mot"""
 
+    normes_documents: list[float]
+    """ Contient les normes des vecteurs documents. Elles sont calculées une 
+    fois pour toutes """
+
 
     def __init__(
         self,
@@ -46,8 +50,10 @@ class SearchEngine:
         )
 
         # On calucle la matrice TF-IDF
-        self.build_matrix_tf_idf(
-        )
+        self.build_matrix_tf_idf()
+
+        # On calcule les normes des vecteurs documents 1 seule fois
+        self.build_normes_vecteurs_documents()
 
 
     def build_matrix_tf(
@@ -106,6 +112,19 @@ class SearchEngine:
         # On construit la matrice TF-IDF en multipliant la matrice TF par les
         # coefficients IDF
         self.matrix_tf_idf = matrix_tf.multiply(self.idf_mots).tolil()
+
+
+    def build_normes_vecteurs_documents(self):
+        """
+        Pour chaque document, stoque la norme de son vecteur, en conservant le
+        même ordre que celui de la matrice TF-IDF, c'est a dire trié par
+        ID document
+        """
+
+        self.normes_documents = [
+            np.sqrt(vector_document.multiply(vector_document).sum())
+            for vector_document in self.matrix_tf_idf
+        ]
 
 
 
@@ -195,7 +214,7 @@ class SearchEngine:
         list_cos = []
 
         # Pour chaque document
-        for num_row, vector_document in enumerate(tqdm(
+        for num_document, vector_document in enumerate(tqdm(
             self.matrix_tf_idf,
             total = self.matrix_tf_idf.shape[0],
             desc = "Recherche dans le corpus",
@@ -207,10 +226,8 @@ class SearchEngine:
                 vector_document.multiply(in_vector_recherche).sum()
             )
 
-            # On calucle la norme du vecteur document
-            norme_vecteur_document = np.sqrt(
-                vector_document.multiply(vector_document).sum()
-            )
+            # On récupère la norme précalculée du document
+            norme_vecteur_document = self.normes_documents[num_document]
 
             # Calcule le cosinus entre le vecteur recherche et le vecteur document
             cos_recherche_document = (
