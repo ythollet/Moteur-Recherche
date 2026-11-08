@@ -33,5 +33,23 @@ jobs:
       - name: Récupérer le code
         uses: actions/checkout@v7
 
-      - name: Construire l’image Docker
-        run: docker build .
+      - name: Construire l’image Streamlit
+        run: docker compose build streamlit
+
+      - name: Démarrer Streamlit
+        run: docker compose up -d streamlit
+
+      - name: Vérifier que Streamlit répond
+        run: |
+          curl --fail --show-error --silent \
+            --retry 15 --retry-connrefused --retry-delay 2 \
+            --max-time 5 --retry-max-time 60 \
+            http://localhost:8501/_stcore/health
+
+      - name: Afficher les journaux en cas d’échec
+        if: failure()
+        run: docker compose logs --no-color streamlit
+
+      - name: Arrêter les conteneurs
+        if: always()
+        run: docker compose down
