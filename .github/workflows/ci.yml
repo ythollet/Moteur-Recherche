@@ -42,7 +42,7 @@ jobs:
       - name: Vérifier que Streamlit répond
         run: |
           curl --fail --show-error --silent \
-            --retry 15 --retry-connrefused --retry-delay 2 \
+            --retry 15 --retry-all-errors --retry-delay 2 \
             --max-time 5 --retry-max-time 60 \
             http://localhost:8501/_stcore/health
 
